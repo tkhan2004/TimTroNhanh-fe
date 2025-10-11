@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null,
+    token: null,
     isLoggedIn: false
   }),
 
@@ -53,19 +54,45 @@ export const useAuthStore = defineStore('auth', {
 
     logout() {
       this.user = null
+      this.token = null
       this.isLoggedIn = false
       localStorage.removeItem('user')
+      localStorage.removeItem('token')
       localStorage.removeItem('isLoggedIn')
       localStorage.removeItem('userRole')
+    },
+
+    setUser(userData) {
+      this.user = userData
+      this.isLoggedIn = true
+      
+      // Lưu vào localStorage
+      localStorage.setItem('user', JSON.stringify(userData))
+      localStorage.setItem('isLoggedIn', 'true')
+      localStorage.setItem('userRole', userData.role)
+    },
+
+    setToken(token) {
+      this.token = token
+      localStorage.setItem('token', token)
+    },
+
+    setUserAndToken(userData, token) {
+      this.setUser(userData)
+      this.setToken(token)
     },
 
     restoreSession() {
       const savedUser = localStorage.getItem('user')
       const savedLoginStatus = localStorage.getItem('isLoggedIn')
+      const savedToken = localStorage.getItem('token')
       
       if (savedUser && savedLoginStatus === 'true') {
         this.user = JSON.parse(savedUser)
         this.isLoggedIn = true
+        if (savedToken) {
+          this.token = savedToken
+        }
       }
     }
   }

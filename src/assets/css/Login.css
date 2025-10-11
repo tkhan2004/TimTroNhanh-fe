@@ -151,6 +151,17 @@
   height: 16px;
 }
 
+.google-signin-button {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.google-signin-button iframe {
+  width: 100% !important;
+  height: 40px !important;
+}
+
 /* Divider */
 .divider {
   text-align: center;

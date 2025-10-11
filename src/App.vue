@@ -1,6 +1,10 @@
 <script setup>
 import Navbar from './components/Navbar.vue'
 import Footer from './components/Footer.vue'
+import { useGoogleAuth } from './composables/useGoogleAuth'
+
+// Xử lý Google OAuth callback khi app khởi động
+useGoogleAuth()
 </script>
 
 <template>
