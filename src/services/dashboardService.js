@@ -1,62 +1,42 @@
-// import axios from 'axios'
+import apiClient from './api'
+import { API_ENDPOINTS } from '@/constants/api'
 
-// const API_BASE_URL = process.env.VUE_APP_API_URL || 'http://localhost:3000/api'
+/**
+ * Dashboard Service
+ * Xử lý các API liên quan đến dashboard (admin)
+ */
+export const dashboardService = {
+  /**
+   * Lấy thống kê tổng quan cho Dashboard (admin only)
+   * @returns {Promise<Object>} StatisticOverviewResponse
+   * @returns {number} totalUsers - Tổng số users
+   * @returns {number} newUsersThisMonth - Số users mới trong tháng
+   * @returns {number} totalRooms - Tổng số phòng
+   * @returns {number} newRoomsThisMonth - Số phòng mới trong tháng
+   * @returns {number} pendingReports - Số báo cáo đang chờ xử lý
+   */
+  async getStatisticsOverview() {
+    try {
+      const response = await apiClient.get(API_ENDPOINTS.ADMIN.STATISTICS_OVERVIEW)
+      return response.data
+    } catch (error) {
+      throw this.handleError(error, 'Không thể lấy dữ liệu thống kê')
+    }
+  },
 
-// /**
-//  * Dashboard API service
-//  */
-// export const dashboardService = {
-//   /**
-//    * Lấy thống kê tổng quan dashboard
-//    * @returns {Promise} API response
-//    */
-//   async getStats() {
-//     try {
-//       const response = await axios.get(`${API_BASE_URL}/dashboard/stats`)
-//       return response.data
-//     } catch (error) {
-//       throw new Error('Không thể lấy dữ liệu thống kê')
-//     }
-//   },
-
-//   /**
-//    * Lấy trạng thái phòng
-//    * @returns {Promise} API response
-//    */
-//   async getRoomStatus() {
-//     try {
-//       const response = await axios.get(`${API_BASE_URL}/dashboard/room-status`)
-//       return response.data
-//     } catch (error) {
-//       throw new Error('Không thể lấy trạng thái phòng')
-//     }
-//   },
-
-//   /**
-//    * Lấy hoạt động gần đây
-//    * @param {number} limit - Số lượng hoạt động
-//    * @returns {Promise} API response
-//    */
-//   async getRecentActivities(limit = 10) {
-//     try {
-//       const response = await axios.get(`${API_BASE_URL}/dashboard/activities?limit=${limit}`)
-//       return response.data
-//     } catch (error) {
-//       throw new Error('Không thể lấy hoạt động gần đây')
-//     }
-//   },
-
-//   /**
-//    * Lấy dữ liệu biểu đồ doanh thu
-//    * @param {string} period - Khoảng thời gian (6months, 12months)
-//    * @returns {Promise} API response
-//    */
-//   async getRevenueChart(period = '6months') {
-//     try {
-//       const response = await axios.get(`${API_BASE_URL}/dashboard/revenue?period=${period}`)
-//       return response.data
-//     } catch (error) {
-//       throw new Error('Không thể lấy dữ liệu doanh thu')
-//     }
-//   }
-// }
+  /**
+   * Xử lý lỗi từ API
+   * @param {Error} error - Error object
+   * @param {string} defaultMessage - Default error message
+   * @returns {Error} Formatted error
+   */
+  handleError(error, defaultMessage) {
+    if (error.response?.data?.message) {
+      return new Error(error.response.data.message)
+    }
+    if (error.message) {
+      return new Error(error.message)
+    }
+    return new Error(defaultMessage)
+  }
+}
