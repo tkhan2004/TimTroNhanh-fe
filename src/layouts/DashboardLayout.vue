@@ -31,23 +31,7 @@
     <!-- Main Content -->
     <div class="dashboard-main">
       <!-- Top Header -->
-      <header class="dashboard-header">
-        <button @click="toggleSidebar" class="sidebar-toggle">
-          <MenuIcon />
-        </button>
-        
-        <div class="header-actions">
-          <button class="notification-btn">
-            <BellIcon />
-            <span class="notification-badge">3</span>
-          </button>
-          
-          <div class="user-menu">
-            <img src="https://via.placeholder.com/32" alt="Avatar" class="user-avatar" />
-            <span class="user-name">Chủ nhà ABC</span>
-          </div>
-        </div>
-      </header>
+      <DashboardHeader @toggle-sidebar="toggleSidebar" />
 
       <!-- Page Content -->
       <main class="dashboard-content">
@@ -58,8 +42,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import DashboardHeader from '@/components/DashboardHeader.vue'
 import { 
   HomeIcon, 
   BuildingIcon, 
@@ -73,18 +59,29 @@ import {
 } from '@/components/icons'
 
 const router = useRouter()
+const authStore = useAuthStore()
 
 /** Sidebar state */
 const sidebarCollapsed = ref(false)
 
-/** Menu items */
-const menuItems = [
-  { label: 'Tổng quan', route: 'DashboardOverview', icon: 'HomeIcon' },
-  { label: 'Đăng tin mới', route: 'PostRoom', icon: 'PlusIcon' },
-  { label: 'Quản lý phòng', route: 'RoomManagement', icon: 'BuildingIcon' },
+/** Menu items - chỉ hiển thị cho OWNER */
+const menuItems = computed(() => {
+  const items = [
+    { label: 'Tổng quan', route: 'DashboardOverview', icon: 'HomeIcon' },
+    { label: 'Đăng tin mới', route: 'PostRoom', icon: 'PlusIcon' },
+    { label: 'Quản lý phòng', route: 'RoomManagement', icon: 'BuildingIcon' }
+  ]
+  
+  // Chỉ ADMIN mới thấy Analytics
+  if (authStore.isAdmin) {
+    items.push({ label: 'Thống kê', route: 'Analytics', icon: 'BarChartIcon' })
+  }
+  
+  return items
+})
 
-  { label: 'Thống kê', route: 'Analytics', icon: 'BarChartIcon' }
-]
+/** Current user */
+const currentUser = computed(() => authStore.user)
 
 /** Toggle sidebar */
 const toggleSidebar = () => {
@@ -92,10 +89,29 @@ const toggleSidebar = () => {
 }
 
 /** Logout function */
-const logout = () => {
-  // TODO: Gọi API logout
+const logout = async () => {
+  await authStore.logout()
   router.push({ name: 'Home' })
 }
+
+/** Check if user has access */
+onMounted(() => {
+  // Restore session
+  if (!authStore.isLoggedIn) {
+    authStore.restoreSession()
+  }
+  
+  // Nếu không phải OWNER/ADMIN, redirect về home
+  if (authStore.isLoggedIn && !authStore.isLandlord && !authStore.isAdmin) {
+    router.push({ 
+      name: 'Home',
+      query: { 
+        error: 'access_denied',
+        message: 'Bạn không có quyền truy cập dashboard. Chỉ chủ trọ mới có thể quản lý phòng.'
+      }
+    })
+  }
+})
 </script>
 
 <style scoped src="@/assets/css/DashboardLayout.css"></style>
