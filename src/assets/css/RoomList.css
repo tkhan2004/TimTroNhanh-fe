@@ -64,7 +64,9 @@
   color: #333;
 }
 
-.filter-select, .price-input, .area-input {
+.filter-select,
+.price-input,
+.area-input {
   width: 100%;
   padding: 10px;
   margin-bottom: 10px;
@@ -72,26 +74,30 @@
   border-radius: 6px;
 }
 
-.price-range-inputs, .area-range-inputs {
+.price-range-inputs,
+.area-range-inputs {
   display: flex;
   align-items: center;
   gap: 10px;
   position: relative;
 }
 
-.price-unit, .area-unit {
+.price-unit,
+.area-unit {
   position: absolute;
   right: 10px;
   color: #666;
 }
 
-.price-presets, .area-presets {
+.price-presets,
+.area-presets {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
 }
 
-.price-preset-btn, .area-preset-btn {
+.price-preset-btn,
+.area-preset-btn {
   padding: 8px;
   background-color: #f0f0f0;
   border: 1px solid #e0e0e0;
@@ -100,7 +106,8 @@
   transition: background-color 0.3s ease;
 }
 
-.price-preset-btn:hover, .area-preset-btn:hover {
+.price-preset-btn:hover,
+.area-preset-btn:hover {
   background-color: #e0e0e0;
 }
 
@@ -153,9 +160,9 @@
 }
 
 .rooms-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .no-results {
@@ -189,24 +196,16 @@
   .room-list-content {
     grid-template-columns: 250px 1fr;
   }
-
-  .rooms-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
 }
 
 @media (max-width: 992px) {
   .room-list-content {
     grid-template-columns: 1fr;
   }
-
-  .rooms-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
 }
 
 @media (max-width: 576px) {
-  .rooms-grid {
-    grid-template-columns: 1fr;
+  .room-list-container {
+    padding: 10px;
   }
 }
