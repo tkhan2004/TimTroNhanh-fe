@@ -35,6 +35,20 @@ export const roomService = {
   },
 
   /**
+   * Lấy danh sách phòng cho khách (không cần login)
+   * @param {Object} params - Query parameters (same as getAllRooms)
+   * @returns {Promise<Object>} Paginated rooms response
+   */
+  async getAllRoomsForGuest(params = {}) {
+    try {
+      const response = await apiClient.get(API_ENDPOINTS.ROOMS.FOR_GUEST, { params })
+      return response.data
+    } catch (error) {
+      throw this.handleError(error, 'Không thể lấy danh sách phòng')
+    }
+  },
+
+  /**
    * Lấy chi tiết phòng theo ID
    * @param {number|string} id - Room ID
    * @returns {Promise<Object>} Room detail response
@@ -42,6 +56,20 @@ export const roomService = {
   async getRoomById(id) {
     try {
       const response = await apiClient.get(API_ENDPOINTS.ROOMS.BY_ID(id))
+      return response.data
+    } catch (error) {
+      throw this.handleError(error, 'Không thể lấy chi tiết phòng')
+    }
+  },
+
+  /**
+   * Lấy chi tiết phòng cho khách (không cần login)
+   * @param {number|string} id - Room ID
+   * @returns {Promise<Object>} Room detail response
+   */
+  async getRoomByIdForGuest(id) {
+    try {
+      const response = await apiClient.get(API_ENDPOINTS.ROOMS.BY_ID_FOR_GUEST(id))
       return response.data
     } catch (error) {
       throw this.handleError(error, 'Không thể lấy chi tiết phòng')
