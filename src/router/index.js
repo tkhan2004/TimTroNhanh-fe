@@ -2,95 +2,96 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { requireAuth, requireOwner, requireAdmin, redirectIfAuthenticated } from './guards'
 
 const routes = [
+  // Guest Routes
   {
     path: '/',
-    name: 'Home',
-    component: () => import('@/pages/Home.vue')
+    component: () => import('@/layouts/GuestLayout.vue'),
+    children: [
+      {
+        path: '',
+        name: 'Home',
+        component: () => import('@/pages/guest/Home.vue')
+      },
+      {
+        path: 'rooms',
+        name: 'RoomList',
+        component: () => import('@/pages/guest/RoomList.vue')
+      },
+      {
+        path: 'room/:id',
+        name: 'RoomDetail',
+        component: () => import('@/pages/guest/RoomDetail.vue'),
+        props: true
+      },
+      {
+        path: 'about',
+        name: 'About',
+        component: () => import('@/pages/guest/About.vue')
+      },
+      {
+        path: ':pathMatch(.*)*',
+        name: 'NotFound',
+        component: () => import('@/pages/guest/NotFound.vue')
+      }
+    ]
   },
-  {
-    path: '/login',
-    name: 'Login',
-    component: () => import('@/components/Login.vue'),
-    beforeEnter: redirectIfAuthenticated
-  },
-  {
-    path: '/rooms',
-    name: 'RoomList',
-    component: () => import('@/pages/RoomList.vue')
-  },
-  {
-    path: '/room/:id',
-    name: 'RoomDetail',
-    component: () => import('@/pages/RoomDetail.vue'),
-    props: true
-  },
-  {
-    path: '/post',
-    name: 'Post',
-    component: () => import('@/pages/Post.vue'),
-    beforeEnter: requireOwner,
-    meta: { 
-      title: 'Đăng tin cho thuê',
-      requiresOwner: true 
-    }
-  },
-  {
-    path: '/about',
-    name: 'About',
-    component: () => import('@/pages/About.vue')
-  },
+
+  // Landlord Routes
   {
     path: '/landlord',
     component: () => import('@/layouts/LandlordLayout.vue'),
+    meta: { layout: 'landlord' },
     children: [
       {
         path: '',
         name: 'Landlord',
-        component: () => import('@/pages/Landlord.vue'),
-        meta: { title: 'Dành cho chủ trọ' }
+        component: () => import('@/pages/landlord/Landlord.vue'),
+        meta: { title: 'Dành cho chủ trọ', layout: 'landlord' }
       }
     ]
   },
-  // Dashboard routes - Chỉ OWNER và ADMIN mới vào được
+
+  // Dashboard Routes
   {
     path: '/dashboard',
     component: () => import('@/layouts/DashboardLayout.vue'),
     beforeEnter: requireOwner,
-    meta: { 
-      requiresOwner: true 
+    meta: {
+      requiresOwner: true,
+      layout: 'dashboard'
     },
     children: [
       {
         path: '',
         name: 'DashboardOverview',
-        component: () => import('@/pages/dashboard/DashboardOverview.vue'),
+        component: () => import('@/pages/landlord/dashboard/DashboardOverview.vue'),
         meta: { title: 'Tổng quan' }
       },
       {
         path: 'post',
         name: 'PostRoom',
-        component: () => import('@/pages/dashboard/PostRoom.vue'),
-        meta: { title: 'Đăng tin mới' }
+        component: () => import('@/pages/landlord/dashboard/PostRoom.vue'),
+        meta: { layout: 'dashboard', title: 'Đăng tin mới' }
       },
       {
         path: 'rooms',
         name: 'RoomManagement',
-        component: () => import('@/pages/dashboard/RoomManagement.vue'),
-        meta: { title: 'Quản lý phòng' }
+        component: () => import('@/pages/landlord/dashboard/RoomManagement.vue'),
+        meta: { layout: 'dashboard', title: 'Quản lý phòng' }
+      },
+      {
+        path: 'rooms/:id',
+        name: 'OwnerRoomDetail',
+        component: () => import('@/pages/landlord/dashboard/OwnerRoomDetail.vue'),
+        meta: { layout: 'dashboard', title: 'Chi tiết phòng' }
       },
       {
         path: 'analytics',
         name: 'Analytics',
-        component: () => import('@/pages/dashboard/Analytics.vue'),
+        component: () => import('@/pages/landlord/dashboard/Analytics.vue'),
         meta: { title: 'Thống kê' }
       }
     ]
-  },
-  // 404 page
-  {
-    path: '/:pathMatch(.*)*',
-    name: 'NotFound',
-    component: () => import('@/pages/NotFound.vue')
   }
 ]
 
@@ -107,7 +108,7 @@ router.beforeEach((to, from, next) => {
   } else {
     document.title = 'PhongTro247 - Tìm trọ nhanh, uy tín'
   }
-  
+
   next()
 })
 

@@ -1,19 +1,74 @@
 <script setup>
-import Navbar from './components/Navbar.vue'
-import Footer from './components/Footer.vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useGoogleAuth } from './composables/useGoogleAuth'
+import { useAuthStore } from './stores/auth'
 
 // Xử lý Google OAuth callback khi app khởi động
 useGoogleAuth()
+
+const route = useRoute()
+const router = useRouter()
+const authStore = useAuthStore()
+
+// Error message từ query params
+const errorMessage = ref('')
+const showError = ref(false)
+
+// Watch route changes để hiển thị error messages
+watch(() => route.query, (newQuery) => {
+  if (newQuery.error === 'access_denied' && newQuery.message) {
+    errorMessage.value = decodeURIComponent(newQuery.message)
+    showError.value = true
+    
+    // Auto hide sau 5 giây
+    setTimeout(() => {
+      showError.value = false
+      // Remove error from query
+      const { error, message, ...rest } = route.query
+      router.replace({ query: rest })
+    }, 5000)
+  }
+  
+  // Auto open login modal nếu có query login=true
+  if (newQuery.login === 'true') {
+    // Trigger login modal (cần emit event hoặc dùng store)
+    // Có thể thêm logic mở modal ở đây
+  }
+}, { immediate: true })
+
+// Restore session on mount
+onMounted(() => {
+  if (!authStore.isLoggedIn) {
+    authStore.restoreSession()
+  }
+})
+
+const closeError = () => {
+  showError.value = false
+  const { error, message, ...rest } = route.query
+  router.replace({ query: rest })
+}
 </script>
+
+
 
 <template>
   <div class="min-h-screen flex flex-col">
-    <Navbar />
-    <main class="flex-1">
-      <router-view />
-    </main>
-    <Footer />
+    <!-- Error Alert (global) -->
+    <transition name="fade">
+      <div v-if="showError" class="error-banner">
+        <div class="error-content">
+          <svg viewBox="0 0 24 24" class="error-icon">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+          </svg>
+          <span class="error-text">{{ errorMessage }}</span>
+          <button @click="closeError" class="error-close">×</button>
+        </div>
+      </div>
+    </transition>
+    
+    <router-view />
   </div>
 </template>
 
@@ -306,6 +361,55 @@ a:hover {
 ::-moz-selection {
   background-color: rgba(59, 130, 246, 0.2);
   color: #1e40af;
+}
+
+/* Error Banner */
+.error-banner {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  padding: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  z-index: 999;
+}
+
+.error-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.error-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.error-text {
+  flex: 1;
+  font-weight: 500;
+}
+
+.error-close {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.5rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.error-close:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 /* Print styles */
