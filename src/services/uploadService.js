@@ -67,6 +67,7 @@ export const uploadService = {
       })
       return response.data
     } catch (error) {
+      console.error('Upload Service Error:', error.response || error)
       throw this.handleError(error, 'Không thể upload ảnh phòng')
     }
   },
