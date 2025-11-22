@@ -137,6 +137,9 @@
               />
               <span>{{ utility.name }}</span>
             </label>
+            <div v-if="utilities.length === 0" class="loading-utilities">
+              Đang tải tiện ích...
+            </div>
           </div>
         </div>
 
@@ -163,36 +166,47 @@
           </div>
         </div>
 
-        <div class="rooms-grid">
-          <RoomCard 
-            v-for="room in paginatedRooms" 
-            :key="room.id" 
-            :room="room"
-          />
+        <div v-if="loading" class="loading-container">
+          <p>Đang tải danh sách phòng...</p>
         </div>
 
-        <div 
-          v-if="filteredRooms.length === 0" 
-          class="no-results"
-        >
-          <p>Không tìm thấy phòng phù hợp</p>
-          <button @click="resetFilters">Đặt lại bộ lọc</button>
+        <div v-else-if="error" class="error-container">
+          <p>{{ error }}</p>
+          <button @click="applyFilters">Thử lại</button>
         </div>
 
-        <div class="pagination">
-          <button 
-            @click="prevPage" 
-            :disabled="currentPage === 1"
+        <div v-else>
+          <div class="rooms-grid">
+            <RoomCard 
+              v-for="room in paginatedRooms" 
+              :key="room.id" 
+              :room="room"
+            />
+          </div>
+
+          <div 
+            v-if="paginatedRooms.length === 0" 
+            class="no-results"
           >
-            Trang trước
-          </button>
-          <span>Trang {{ currentPage }} / {{ totalPages }}</span>
-          <button 
-            @click="nextPage" 
-            :disabled="currentPage === totalPages"
-          >
-            Trang tiếp
-          </button>
+            <p>Không tìm thấy phòng phù hợp</p>
+            <button @click="resetFilters">Đặt lại bộ lọc</button>
+          </div>
+
+          <div v-if="totalPages > 1" class="pagination">
+            <button 
+              @click="prevPage" 
+              :disabled="currentPage === 0"
+            >
+              Trang trước
+            </button>
+            <span>Trang {{ currentPage + 1 }} / {{ totalPages }}</span>
+            <button 
+              @click="nextPage" 
+              :disabled="currentPage >= totalPages - 1"
+            >
+              Trang tiếp
+            </button>
+          </div>
         </div>
       </main>
     </div>
@@ -200,15 +214,23 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import RoomCard from '@/components/RoomCard.vue'
+import { useRooms } from '@/composables/useRooms'
+import { utilityService } from '@/services/utilityService'
 
-// Room Types
+// Use rooms composable
+const { loading, error, rooms, pagination, fetchRooms } = useRooms()
+
+// Room Types - Map với API enum
 const roomTypes = [
   { label: 'Tất cả', value: '' },
-  { label: 'Phòng trọ', value: 'room' },
-  { label: 'Nhà nguyên căn', value: 'house' },
-  { label: 'Căn hộ', value: 'apartment' }
+  { label: 'Phòng trọ', value: 'PHONG_TRO' },
+  { label: 'Chung cư', value: 'CHUNG_CU' },
+  { label: 'Nhà nguyên căn', value: 'NHA_NGUYEN_CAN' },
+  { label: 'Căn hộ dịch vụ', value: 'CAN_HO_DICH_VU' },
+  { label: 'Nhà mặt tiền', value: 'NHA_MAT_TIEN' },
+  { label: 'Studio', value: 'STUDIO' }
 ]
 
 // City and District Data
@@ -231,115 +253,74 @@ const cityDistricts = {
   ]
 }
 
-// Utilities
-const utilities = [
-  { id: 1, name: 'Wifi' },
-  { id: 2, name: 'Điều hòa' },
-  { id: 3, name: 'Giường' },
-  { id: 4, name: 'Tủ quần áo' },
-  { id: 5, name: 'Bếp' },
-  { id: 6, name: 'Máy giặt' }
-]
+// Utilities - sẽ load từ API
+const utilities = ref([])
 
-// Price Presets
+// Load utilities từ API
+const loadUtilities = async () => {
+  try {
+    const response = await utilityService.getAllUtilities()
+    if (response.status === 200 && response.data) {
+      utilities.value = response.data
+    }
+  } catch (err) {
+    console.error('Error loading utilities:', err)
+  }
+}
+
+// Price Presets (giá tính bằng triệu)
 const pricePresets = [
-  { label: 'Dưới 1 triệu', min: 0, max: 1 },
-  { label: '1-3 triệu', min: 1, max: 3 },
-  { label: '3-5 triệu', min: 3, max: 5 },
-  { label: '5-10 triệu', min: 5, max: 10 }
+  { label: 'Dưới 1 triệu', min: '0', max: '1000000' },
+  { label: '1-3 triệu', min: '1000000', max: '3000000' },
+  { label: '3-5 triệu', min: '3000000', max: '5000000' },
+  { label: '5-10 triệu', min: '5000000', max: '10000000' },
+  { label: 'Trên 10 triệu', min: '10000000', max: null }
 ]
 
 // Area Presets
 const areaPresets = [
-  { label: 'Dưới 20m²', min: 0, max: 20 },
-  { label: '20-30m²', min: 20, max: 30 },
-  { label: '30-50m²', min: 30, max: 50 },
-  { label: 'Trên 50m²', min: 50, max: null }
+  { label: 'Dưới 20m²', min: '0', max: '20' },
+  { label: '20-30m²', min: '20', max: '30' },
+  { label: '30-50m²', min: '30', max: '50' },
+  { label: 'Trên 50m²', min: '50', max: null }
 ]
 
 // Reactive State
 const selectedRoomType = ref('')
 const selectedCity = ref('')
 const selectedDistrict = ref('')
+const selectedWard = ref('')
 const priceFrom = ref(null)
 const priceTo = ref(null)
 const areaFrom = ref(null)
 const areaTo = ref(null)
 const selectedUtilities = ref([])
 const sortOption = ref('newest')
-const currentPage = ref(1)
+const sortBy = computed(() => {
+  switch (sortOption.value) {
+    case 'lowest_price': return 'price'
+    case 'highest_price': return 'price'
+    case 'largest_area': return 'area'
+    default: return 'createdAt'
+  }
+})
+const sortDirection = computed(() => {
+  if (sortOption.value === 'lowest_price') return 'asc'
+  if (sortOption.value === 'highest_price') return 'desc'
+  if (sortOption.value === 'largest_area') return 'desc'
+  return 'desc'
+})
+const currentPage = ref(0)
 const itemsPerPage = ref(12)
 
-// Mock Rooms Data
-const rooms = ref([
-  {
-    id: 1,
-    title: 'Phòng trọ đầy đủ tiện nghi',
-    type: 'room',
-    price: 3500000,
-    area: 25,
-    location: 'Quận 1, TP. Hồ Chí Minh',
-    img: 'https://picsum.photos/300/200?1',
-    utilities: [1, 2, 3],
-    city: 'hcm',
-    district: 'q1'
-  },
-  // Add more mock rooms...
-])
-
 // Computed Properties
-const filteredRooms = computed(() => {
-  return rooms.value.filter(room => {
-    // Room Type Filter
-    if (selectedRoomType.value && room.type !== selectedRoomType.value) return false
-
-    // City Filter
-    if (selectedCity.value && room.city !== selectedCity.value) return false
-
-    // District Filter
-    if (selectedDistrict.value && room.district !== selectedDistrict.value) return false
-
-    // Price Filter
-    const roomPrice = room.price / 1000000
-    if (priceFrom.value && roomPrice < priceFrom.value) return false
-    if (priceTo.value && roomPrice > priceTo.value) return false
-
-    // Area Filter
-    if (areaFrom.value && room.area < areaFrom.value) return false
-    if (areaTo.value && room.area > areaTo.value) return false
-
-    // Utilities Filter
-    if (selectedUtilities.value.length > 0) {
-      const hasAllUtilities = selectedUtilities.value.every(utilityId => 
-        room.utilities.includes(utilityId)
-      )
-      if (!hasAllUtilities) return false
-    }
-
-    return true
-  }).sort((a, b) => {
-    switch (sortOption.value) {
-      case 'lowest_price': return a.price - b.price
-      case 'highest_price': return b.price - a.price
-      case 'largest_area': return b.area - a.area
-      default: return 0 // newest
-    }
-  })
-})
-
-// Pagination
-const totalPages = computed(() => Math.ceil(filteredRooms.value.length / itemsPerPage.value))
-
-const paginatedRooms = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value
-  const end = start + itemsPerPage.value
-  return filteredRooms.value.slice(start, end)
-})
+const totalPages = computed(() => pagination.value.totalPages || 0)
+const paginatedRooms = computed(() => rooms.value || [])
 
 // Page Title
 const pageTitle = computed(() => {
   const typeLabel = roomTypes.find(type => type.value === selectedRoomType.value)?.label || 'Tất cả phòng'
-  return `${typeLabel} (${filteredRooms.value.length} phòng)`
+  return `${typeLabel} (${pagination.value.totalElements || 0} phòng)`
 })
 
 // Methods
@@ -349,6 +330,7 @@ const getDistrictsByCity = (city) => {
 
 const selectRoomType = (type) => {
   selectedRoomType.value = type
+  applyFilters()
 }
 
 const applyPricePreset = (preset) => {
@@ -361,35 +343,88 @@ const applyAreaPreset = (preset) => {
   areaTo.value = preset.max
 }
 
-const applyFilters = () => {
-  // Trigger filtering (computed property will handle this)
-  currentPage.value = 1
+const applyFilters = async () => {
+  currentPage.value = 0 // Reset về trang đầu
+  
+  const params = {
+    page: currentPage.value,
+    size: itemsPerPage.value,
+    sortBy: sortBy.value,
+    sortDirection: sortDirection.value
+  }
+  
+  // Add filters
+  if (selectedRoomType.value) {
+    params.roomType = selectedRoomType.value
+  }
+  if (selectedCity.value) {
+    params.city = selectedCity.value
+  }
+  if (selectedDistrict.value) {
+    params.district = selectedDistrict.value
+  }
+  if (selectedWard.value) {
+    params.ward = selectedWard.value
+  }
+  if (priceFrom.value) {
+    params.minPrice = priceFrom.value
+  }
+  if (priceTo.value) {
+    params.maxPrice = priceTo.value
+  }
+  if (areaFrom.value) {
+    params.minArea = areaFrom.value
+  }
+  if (areaTo.value) {
+    params.maxArea = areaTo.value
+  }
+  if (selectedUtilities.value.length > 0) {
+    // Note: API có thể không hỗ trợ utilityIds filter trực tiếp
+    // Có thể cần filter ở frontend hoặc backend hỗ trợ
+  }
+  
+  await fetchRooms(params)
 }
 
-const resetFilters = () => {
+const resetFilters = async () => {
   selectedRoomType.value = ''
   selectedCity.value = ''
   selectedDistrict.value = ''
+  selectedWard.value = ''
   priceFrom.value = null
   priceTo.value = null
   areaFrom.value = null
   areaTo.value = null
   selectedUtilities.value = []
   sortOption.value = 'newest'
-  currentPage.value = 1
+  currentPage.value = 0
+  await applyFilters()
 }
 
-const prevPage = () => {
-  if (currentPage.value > 1) {
+const prevPage = async () => {
+  if (currentPage.value > 0) {
     currentPage.value--
+    await applyFilters()
   }
 }
 
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
+const nextPage = async () => {
+  if (currentPage.value < totalPages.value - 1) {
     currentPage.value++
+    await applyFilters()
   }
 }
+
+// Watch sort option changes
+watch(sortOption, () => {
+  applyFilters()
+})
+
+// Load data on mount
+onMounted(async () => {
+  await loadUtilities()
+  await applyFilters()
+})
 </script>
 
 <!-- Import external CSS file for RoomList view styles -->

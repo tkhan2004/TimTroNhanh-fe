@@ -114,8 +114,27 @@
             </svg>
             <h3 class="feature-title">Minh bạch giá</h3>
             <p class="feature-description">Không phát sinh chi phí ẩn, giá rõ ràng</p>
-      </div>
-    </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Landlord CTA Section -->
+      <section class="landlord-cta">
+        <div class="cta-content">
+          <div class="cta-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+          </div>
+          <h2 class="cta-title">Bạn là chủ trọ?</h2>
+          <p class="cta-description">
+            Đăng tin miễn phí, quản lý phòng trọ dễ dàng, tiếp cận hàng nghìn khách thuê tiềm năng
+          </p>
+          <router-link to="/landlord" class="btn btn-primary btn-large">
+            Đăng ký / Đăng nhập cho chủ trọ
+          </router-link>
+        </div>
       </section>
     </div>
   </div>

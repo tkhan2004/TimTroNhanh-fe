@@ -15,7 +15,7 @@
         :class="stat.trend === 'up' ? 'trend-up' : 'trend-down'"
       >
         <div class="stat-icon">
-          <component :is="stat.icon" />
+          <component :is="stat.icon" /> 
         </div>
         <div class="stat-content">
           <h3 class="stat-value">{{ stat.value }}</h3>
@@ -71,9 +71,9 @@
     <div class="recent-activities">
       <div class="section-header">
         <h3 class="section-title">Hoạt động gần đây</h3>
-        <router-link :to="{ name: 'BookingManagement' }" class="view-all-link">
-          Xem tất cả
-        </router-link>
+        <span class="view-all-link" style="cursor: not-allowed; opacity: 0.5;">
+          Xem tất cả (Đang phát triển)
+        </span>
       </div>
       
       <div class="activities-list">
@@ -98,82 +98,99 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { BuildingIcon, UsersIcon, CreditCardIcon, EyeIcon } from '@/components/icons'
+import { roomService } from '@/services/roomService'
 
 /** Stats data */
 const stats = ref([
   {
     label: 'Tổng phòng',
-    value: '24',
-    change: '+2',
-    trend: 'up',
+    value: '0',
+    change: '0',
+    trend: 'neutral',
     icon: 'BuildingIcon'
   },
   {
     label: 'Phòng đã thuê',
-    value: '18',
-    change: '+3',
-    trend: 'up',
+    value: '0',
+    change: '0',
+    trend: 'neutral',
     icon: 'UsersIcon'
   },
   {
     label: 'Doanh thu tháng',
-    value: '45.2M',
-    change: '+12%',
-    trend: 'up',
+    value: '0',
+    change: '0%',
+    trend: 'neutral',
     icon: 'CreditCardIcon'
   },
   {
     label: 'Lượt xem',
-    value: '1,234',
-    change: '+8%',
-    trend: 'up',
+    value: '0',
+    change: '0%',
+    trend: 'neutral',
     icon: 'EyeIcon'
   }
 ])
 
 /** Room status */
 const roomStatus = ref({
-  available: 6,
-  occupied: 18,
-  maintenance: 2
+  available: 0,
+  occupied: 0,
+  maintenance: 0
 })
 
 /** Recent activities */
-const recentActivities = ref([
-  {
-    id: 1,
-    type: 'booking',
-    icon: 'UsersIcon',
-    text: 'Nguyễn Văn A đã đặt phòng 101',
-    time: '2 giờ trước'
-  },
-  {
-    id: 2,
-    type: 'payment',
-    icon: 'CreditCardIcon',
-    text: 'Nhận thanh toán từ phòng 205',
-    time: '4 giờ trước'
-  },
-  {
-    id: 3,
-    type: 'inquiry',
-    icon: 'EyeIcon',
-    text: '5 lượt xem mới cho phòng 301',
-    time: '6 giờ trước'
-  }
-])
+const recentActivities = ref([])
 
 const revenueFilter = ref('6months')
+const loading = ref(false)
 
 /**
  * Load dashboard data từ API
  */
 const loadDashboardData = async () => {
+  loading.value = true
   try {
-    // TODO: Gọi API lấy dữ liệu dashboard
-    console.log('Loading dashboard data...')
+    // Lấy danh sách phòng của user (lấy số lượng lớn để tính toán)
+    const response = await roomService.getMyRooms({ size: 100 })
+    const rooms = response.data?.content || []
+    
+    // 1. Tính toán thống kê phòng
+    const totalRooms = response.data?.totalElements || rooms.length
+    const rentedRooms = rooms.filter(r => r.status === 'RENTED').length
+    const availableRooms = rooms.filter(r => r.status === 'AVAILABLE').length
+    // Giả sử có status MAINTENANCE hoặc tính các status khác
+    const maintenanceRooms = rooms.filter(r => r.status !== 'RENTED' && r.status !== 'AVAILABLE').length
+
+    // Cập nhật Stats Cards
+    stats.value[0].value = totalRooms.toString()
+    stats.value[0].change = '+0' // Cần API lịch sử để tính change thực tế
+    
+    stats.value[1].value = rentedRooms.toString()
+    stats.value[1].change = '+0'
+
+    // Tính doanh thu ước tính (tổng giá các phòng đã thuê)
+    const estimatedRevenue = rooms
+      .filter(r => r.status === 'RENTED')
+      .reduce((sum, r) => sum + (r.price || 0), 0)
+    
+    stats.value[2].value = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(estimatedRevenue)
+
+    // Cập nhật biểu đồ trạng thái
+    roomStatus.value = {
+      available: availableRooms,
+      occupied: rentedRooms,
+      maintenance: maintenanceRooms
+    }
+
+    // TODO: Lấy recent activities từ API nếu có
+    // Tạm thời để trống hoặc mock data nếu cần thiết
+    recentActivities.value = []
+
   } catch (error) {
     console.error('Lỗi khi load dashboard:', error)
+  } finally {
+    loading.value = false
   }
 }
 

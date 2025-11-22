@@ -5,7 +5,7 @@
   </div>
 
   <div v-else-if="error" class="error-container">
-    <p>Đã có lỗi xảy ra: {{ error.message }}</p>
+    <p>Đã có lỗi xảy ra: {{ error }}</p>
     <button @click="fetchRoomDetails">Thử lại</button>
   </div>
 
@@ -15,12 +15,16 @@
       <section class="room-gallery">
         <div class="main-image">
           <img 
+            v-if="room.imageUrls && room.imageUrls.length > 0"
             :src="room.imageUrls[0]" 
             :alt="room.title" 
             class="main-image-display"
           />
+          <div v-else class="no-image-placeholder">
+            Chưa có ảnh
+          </div>
         </div>
-        <div class="thumbnail-images">
+        <div v-if="room.imageUrls && room.imageUrls.length > 1" class="thumbnail-images">
           <img 
             v-for="(image, index) in room.imageUrls.slice(1, 5)" 
             :key="index"
@@ -44,6 +48,7 @@
           <button 
             class="favorite-button" 
             @click="toggleFavorite"
+            :disabled="loading"
           >
             <svg 
               viewBox="0 0 24 24" 
@@ -87,7 +92,7 @@
         </div>
 
         <!-- Room Utilities -->
-        <div class="room-utilities">
+        <div v-if="room.utilities && room.utilities.length > 0" class="room-utilities">
           <h3>Tiện ích</h3>
           <div class="utilities-grid">
             <div 
@@ -95,7 +100,6 @@
               :key="utility.id" 
               class="utility-item"
             >
-              <img :src="utility.icon" :alt="utility.name" />
               <span>{{ utility.name }}</span>
             </div>
           </div>
@@ -174,68 +178,52 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import RoomCard from '@/components/RoomCard.vue'
+import { useRooms } from '@/composables/useRooms'
+import { favoriteService } from '@/services/favoriteService'
 
 // Get the route to access route parameters
 const route = useRoute()
 
+// Use rooms composable
+const { loading, error, fetchRoomById } = useRooms()
+
 // Reactive room data
 const room = ref(null)
-const loading = ref(true)
-const error = ref(null)
+const similarRooms = ref([])
 
 // Fetch room details
 const fetchRoomDetails = async () => {
   try {
-    // In a real application, replace this with an actual API call
-    // For now, we'll simulate an API call with a timeout
-    loading.value = true
-    
-    // Simulated API call
     const roomId = route.params.id
+    const roomData = await fetchRoomById(roomId)
+    room.value = roomData
     
-    // Mock data - in real app, this would be an API call
-    const mockRoomData = {
-      id: roomId,
-      title: `Phòng trọ số ${roomId} - Đầy đủ tiện nghi`,
-      description: 'Phòng trọ rộng rãi, thoáng mát, đầy đủ tiện nghi. Gần trung tâm, an ninh tốt.',
-      price: 4500000,
-      area: 30,
-      address: `123 Đường ABC, Phường XYZ, Quận ${roomId}`,
-      city: 'Hồ Chí Minh',
-      district: `Quận ${roomId}`,
-      ward: 'Phường 1',
-      latitude: 10.7758,
-      longitude: 106.7039,
-      status: 'AVAILABLE',
-      createdAt: new Date(),
-      owner: {
-        fullName: `Chủ nhà ${roomId}`,
-        avatarUrl: `https://picsum.photos/200/200?${roomId}`
-      },
-      utilities: [
-        { id: 1, name: 'Wifi', icon: 'wifi-icon.svg' },
-        { id: 2, name: 'Điều hòa', icon: 'ac-icon.svg' },
-        { id: 3, name: 'Giường', icon: 'bed-icon.svg' }
-      ],
-      imageUrls: [
-        `https://picsum.photos/800/600?${roomId}1`,
-        `https://picsum.photos/800/600?${roomId}2`,
-        `https://picsum.photos/800/600?${roomId}3`,
-        `https://picsum.photos/800/600?${roomId}4`,
-        `https://picsum.photos/800/600?${roomId}5`
-      ],
-      favoriteCount: 42,
-      isFavorited: false
-    }
-
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 500))
-    
-    room.value = mockRoomData
-    loading.value = false
+    // Fetch similar rooms (same city/district)
+    // TODO: Implement similar rooms API call
+    // For now, similarRooms will be empty
   } catch (err) {
-    error.value = err
-    loading.value = false
+    console.error('Error fetching room details:', err)
+  }
+}
+
+// Toggle favorite
+const toggleFavorite = async () => {
+  if (!room.value) return
+  
+  try {
+    const response = await favoriteService.toggleFavorite(room.value.id)
+    if (response.status === 200 && response.data) {
+      // Update favorite status from response
+      if (response.data.isFavorited !== undefined) {
+        room.value.isFavorited = response.data.isFavorited
+      }
+      if (response.data.favoriteCount !== undefined) {
+        room.value.favoriteCount = response.data.favoriteCount
+      }
+    }
+  } catch (err) {
+    console.error('Error toggling favorite:', err)
+    alert('Không thể thay đổi trạng thái yêu thích')
   }
 }
 
@@ -261,16 +249,9 @@ const formatDate = (date) => {
   })
 }
 
-const toggleFavorite = () => {
-  if (room.value) {
-    room.value.isFavorited = !room.value.isFavorited
-    room.value.favoriteCount += room.value.isFavorited ? 1 : -1
-  }
-}
-
 const showPhoneNumber = () => {
-  if (room.value) {
-    alert(`Số điện thoại: ${room.value.owner.phoneNumber || 'Chưa cung cấp'}`)
+  if (room.value?.owner) {
+    alert(`Số điện thoại: ${room.value.owner.phone || 'Chưa cung cấp'}`)
   }
 }
 
