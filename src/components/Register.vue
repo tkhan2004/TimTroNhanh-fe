@@ -57,8 +57,9 @@
             <span class="checkmark"></span>
             <span>Đồng ý điều khoản</span>
           </label>
-          <button type="submit" class="btn btn-primary w-full">
-            Tạo tài khoản
+          <button type="submit" class="btn btn-primary w-full" :disabled="isRegistering">
+            <span v-if="!isRegistering">Tạo tài khoản</span>
+            <span v-else>Đang đăng ký...</span>
           </button>
         </form>
 
@@ -68,6 +69,8 @@
           </p>
         </div>
 
+        <!-- Alerts -->
+        <div v-if="error" class="alert alert-error">{{ error }}</div>
         <div v-if="success" class="alert alert-success">
           Tài khoản đã được tạo thành công!
         </div>
@@ -78,6 +81,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useAuthStore } from '@/stores/auth'
 
 const props = defineProps({
   showModal: {
@@ -88,6 +92,8 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'switchToLogin'])
 
+const authStore = useAuthStore()
+
 /** Form data đăng ký */
 const form = ref({ 
   name: '', 
@@ -97,12 +103,15 @@ const form = ref({
   confirmPassword: '' 
 })
 const success = ref(false)
+const error = ref('')
 const agreeTerms = ref(false)
+const isRegistering = ref(false)
 
 /** Đóng modal và reset form */
 const closeModal = () => {
   emit('close')
   success.value = false
+  error.value = ''
   form.value = { name: '', email: '', phone: '', password: '', confirmPassword: '' }
 }
 
@@ -112,19 +121,63 @@ const switchToLogin = () => {
 }
 
 /** Xử lý đăng ký */
-const register = () => {
-  if (form.value.password !== form.value.confirmPassword) {
-    alert('Mật khẩu xác nhận không khớp!')
+const register = async () => {
+  // Validation
+  if (!form.value.name || !form.value.email || !form.value.password) {
+    error.value = 'Vui lòng nhập đầy đủ thông tin'
     return
   }
 
-  success.value = true
-  setTimeout(() => {
-    closeModal()
-  }, 1500)
+  if (form.value.password !== form.value.confirmPassword) {
+    error.value = 'Mật khẩu xác nhận không khớp!'
+    return
+  }
+
+  if (form.value.password.length < 6) {
+    error.value = 'Mật khẩu phải có ít nhất 6 ký tự'
+    return
+  }
+
+  if (!agreeTerms.value) {
+    error.value = 'Vui lòng đồng ý với điều khoản'
+    return
+  }
+
+  isRegistering.value = true
+  error.value = ''
+  success.value = false
+
+  try {
+    const registerData = {
+      fullName: form.value.name,
+      email: form.value.email,
+      password: form.value.password,
+      phone: form.value.phone || undefined,
+      role: 'RENTER' // Mặc định là RENTER
+    }
+
+    console.log('Register data:', registerData)
+    const result = await authStore.register(registerData)
+    console.log('Register result:', result)
+    
+    if (result.success) {
+      success.value = true
+      setTimeout(() => {
+        closeModal()
+        // Có thể redirect hoặc chuyển sang login
+        switchToLogin()
+      }, 1500)
+    } else {
+      error.value = result.error || 'Đăng ký thất bại'
+      console.error('Register failed:', result.error)
+    }
+  } catch (err) {
+    console.error('Register exception:', err)
+    error.value = err.message || 'Có lỗi xảy ra khi đăng ký'
+  } finally {
+    isRegistering.value = false
+  }
 }
-
-
 </script>
 
 <style src="@/assets/css/Register.css"></style>

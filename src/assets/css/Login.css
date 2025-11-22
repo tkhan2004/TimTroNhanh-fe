@@ -26,6 +26,23 @@
   flex-direction: column;
 }
 
+.modal-content.login-modal {
+  box-shadow: 0 8px 32px rgba(60, 72, 88, 0.18);
+  border-radius: 18px;
+  padding: 2.5rem 2rem 2rem 2rem;
+  background: #fff;
+  max-width: 380px;
+  min-width: 320px;
+  border: none;
+  position: relative;
+  animation: modal-pop 0.25s cubic-bezier(.4,2,.6,1) 1;
+}
+
+@keyframes modal-pop {
+  0% { transform: scale(0.95) translateY(30px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
 /* Demo accounts - fixed positioning */
 .demo-accounts {
   position: absolute;
@@ -87,85 +104,93 @@
 /* Header */
 .modal-header {
   text-align: center;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .login-logo {
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   margin-bottom: 0.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
 
 .modal-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #222;
   margin: 0.5rem 0 0.25rem 0;
-  font-size: 1.4rem;
-  color: #333;
 }
 
 .welcome-text {
-  font-size: 0.85rem;
-  color: #666;
+  font-size: 1rem;
+  color: #6b7280;
   margin: 0;
 }
 
 .modal-close {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
+  top: 1.2rem;
+  right: 1.2rem;
   background: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: 1.7rem;
   cursor: pointer;
-  color: #999;
+  color: #b0b0b0;
+  transition: color 0.2s;
+}
+
+.modal-close:hover {
+  color: #007bff;
 }
 
 /* Social login */
-.social-login {
+.social-login-group {
   display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+  gap: 0.75rem;
+  margin-bottom: 1.2rem;
 }
 
-.social-btn {
+.social-login-group .btn {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.6rem;
-  border: 1px solid #ddd;
+  padding: 0.7rem 0.5rem;
+  font-size: 1rem;
   border-radius: 8px;
-  background: white;
-  cursor: pointer;
-  font-size: 0.8rem;
-  font-weight: 500;
-  transition: all 0.2s;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #222;
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  transition: box-shadow 0.2s, border 0.2s, background 0.2s;
 }
 
-.social-btn:hover {
-  background: #f8f9fa;
+.social-login-group .btn.google {
+  border-color: #e5e7eb;
 }
 
-.social-icon {
-  width: 16px;
-  height: 16px;
+.social-login-group .btn.facebook {
+  border-color: #e5e7eb;
 }
 
-.google-signin-button {
-  width: 100%;
-  display: flex;
-  justify-content: center;
+.social-login-group .btn:hover {
+  background: #f3f4f6;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
 
-.google-signin-button iframe {
-  width: 100% !important;
-  height: 40px !important;
+.social-login-group svg {
+  width: 22px;
+  height: 22px;
+  display: block;
 }
 
 /* Divider */
 .divider {
   text-align: center;
-  margin: 1rem 0;
+  margin: 1.2rem 0 1.2rem 0;
   position: relative;
 }
 
@@ -176,21 +201,24 @@
   left: 0;
   right: 0;
   height: 1px;
-  background: #eee;
+  background: #e5e7eb;
+  z-index: 0;
 }
 
 .divider span {
-  background: white;
+  background: #fff;
+  position: relative;
+  z-index: 1;
   padding: 0 1rem;
-  color: #666;
-  font-size: 0.8rem;
+  color: #888;
+  font-size: 0.95rem;
 }
 
 /* Forms */
 .login-form, .register-form {
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
+  gap: 1rem;
 }
 
 .form-row {
@@ -200,29 +228,31 @@
 
 .form-input {
   width: 100%;
-  padding: 0.7rem;
-  border: 1px solid #ddd;
+  padding: 0.8rem 1rem;
+  border: 1px solid #e5e7eb;
   border-radius: 8px;
-  font-size: 0.9rem;
-  transition: border-color 0.2s;
+  font-size: 1rem;
+  background: #f9fafb;
+  transition: border 0.2s, background 0.2s;
 }
 
 .form-input:focus {
   outline: none;
   border-color: #007bff;
+  background: #fff;
 }
 
 .form-options {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.8rem;
+  font-size: 0.95rem;
 }
 
 .remember-me {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   cursor: pointer;
 }
 
@@ -231,15 +261,13 @@
   border: none;
   color: #007bff;
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: color 0.2s;
 }
 
-.terms-agreement {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.8rem;
-  cursor: pointer;
+.forgot-password:hover {
+  color: #0056b3;
 }
 
 .btn {
@@ -265,11 +293,28 @@
   cursor: not-allowed;
 }
 
+.btn.login-btn {
+  width: 100%;
+  padding: 0.8rem 0;
+  border-radius: 8px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  background: linear-gradient(90deg, #007bff 0%, #0056b3 100%);
+  color: #fff;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.btn.login-btn:hover {
+  background: linear-gradient(90deg, #0056b3 0%, #007bff 100%);
+}
+
 /* Footer */
 .modal-footer {
   text-align: center;
-  margin-top: 1rem;
-  font-size: 0.85rem;
+  margin-top: 1.5rem;
+  font-size: 1rem;
 }
 
 .link-btn {
@@ -277,15 +322,21 @@
   border: none;
   color: #007bff;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: color 0.2s;
+}
+
+.link-btn:hover {
+  color: #0056b3;
 }
 
 /* Alerts */
 .alert {
-  padding: 0.6rem;
-  border-radius: 6px;
-  margin-top: 0.8rem;
-  font-size: 0.85rem;
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+  font-size: 1rem;
 }
 
 .alert-error {
@@ -307,48 +358,102 @@
     margin: 0.5rem;
     max-width: calc(100% - 1rem);
   }
-  
+
+  .modal-content.login-modal {
+    padding: 1.2rem 0.5rem 1.2rem 0.5rem;
+    min-width: unset;
+    max-width: 98vw;
+  }
+
   .login-logo {
-    width: 50px;
-    height: 35px;
+    width: 40px;
+    height: 40px;
   }
-  
+
   .modal-header h2 {
-    font-size: 1.2rem;
+    font-size: 1.15rem;
   }
-  
+
   .welcome-text {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
   }
-  
-  .social-btn {
-    padding: 0.5rem;
-    font-size: 0.75rem;
+
+  .social-login-group .btn {
+    font-size: 0.95rem;
+    padding: 0.6rem 0.2rem;
   }
-  
-  .social-icon {
-    width: 14px;
-    height: 14px;
+
+  .social-login-group svg {
+    width: 18px;
+    height: 18px;
   }
-  
+
   .form-input {
-    padding: 0.6rem;
-    font-size: 0.85rem;
+    font-size: 0.95rem;
+    padding: 0.7rem 0.7rem;
   }
-  
+
   .form-row {
     flex-direction: column;
     gap: 0.6rem;
   }
-  
+
   .demo-accounts {
     position: static;
     margin-top: 1rem;
     max-width: 100%;
   }
-  
+
   .login-modal,
   .register-modal {
     padding-bottom: 2rem;
   }
+
+  .modal-footer {
+    font-size: 0.95rem;
+  }
+}
+
+/* --- Social login button sizing fix --- */
+.btn,
+.login-btn,
+.social-login-btn {
+  padding: 0.7rem 1rem;
+  height: 44px;
+  min-height: 44px;
+  max-height: 44px;
+  font-size: 1rem;
+  line-height: 1.2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-sizing: border-box;
+}
+
+.social-login-btn svg {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Remove any width/height overrides for .google-signin-button iframe */
+.google-signin-button iframe {
+  width: 100% !important;
+  height: 44px !important;
+}
+
+/* Remove extra padding from .social-login-btn if present */
+.social-login-btn {
+  padding: 0.7rem 1rem;
+  font-size: 1rem;
+  height: 44px;
+  min-height: 44px;
+  max-height: 44px;
+}
+
+/* Ensure .w-full makes button 100% width but not taller */
+.w-full {
+  width: 100%;
 }

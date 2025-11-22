@@ -21,18 +21,24 @@
         <router-link to="/about" class="navbar-link">Về chúng tôi</router-link>
         <router-link to="/review" class="navbar-link">Review</router-link>
         <router-link to="/pr" class="navbar-link">Quảng cáo</router-link>
-
+        <router-link to="/landlord" class="navbar-link landlord-link">
+          <svg viewBox="0 0 24 24" class="link-icon">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          Bạn là chủ trọ?
+        </router-link>
       </div>
       <div class="navbar-actions desktop-only">
         <!-- Hiển thị khi chưa đăng nhập -->
         <div v-if="!isLoggedIn" class="navbar-auth">
           <!-- Nút đăng tin - yêu cầu đăng nhập -->
-          <button @click="openLoginModal" class="btn btn-warning navbar-btn post-btn">
+          <router-link to="/landlord" class="btn btn-warning navbar-btn post-btn">
             <svg viewBox="0 0 24 24" class="btn-icon">
               <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
             </svg>
             Đăng tin
-          </button>
+          </router-link>
           
           <button @click="openLoginModal" class="btn btn-primary navbar-btn">
             Đăng nhập
@@ -121,16 +127,23 @@
           <router-link to="/" class="navbar-link" @click="closeMenu">Trang chủ</router-link>
           <router-link to="/rooms" class="navbar-link" @click="closeMenu">Tìm phòng</router-link>
           <router-link to="/about" class="navbar-link" @click="closeMenu">Về chúng tôi</router-link>
+          <router-link to="/landlord" class="navbar-link landlord-link" @click="closeMenu">
+            <svg viewBox="0 0 24 24" class="link-icon">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+            Bạn là chủ trọ?
+          </router-link>
           
           <!-- Mobile auth buttons -->
           <div v-if="!isLoggedIn" class="navbar-auth">
-            <!-- Nút đăng tin mobile - yêu cầu đăng nhập -->
-            <button @click="openLoginModal" class="btn btn-warning navbar-btn post-btn mobile-post-btn">
+            <!-- Nút đăng tin mobile - dẫn đến trang chủ trọ -->
+            <router-link to="/landlord" class="btn btn-warning navbar-btn post-btn mobile-post-btn" @click="closeMenu">
               <svg viewBox="0 0 24 24" class="btn-icon">
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
               </svg>
               Đăng tin
-            </button>
+            </router-link>
             
             <button @click="openLoginModal" class="btn btn-primary navbar-btn">
               Đăng nhập

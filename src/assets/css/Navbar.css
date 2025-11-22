@@ -78,10 +78,28 @@
   color: #333;
   font-weight: 500;
   transition: color 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .navbar-link:hover {
   color: #007bff;
+}
+
+.navbar-link.landlord-link {
+  color: #007bff;
+  font-weight: 600;
+}
+
+.navbar-link.landlord-link:hover {
+  color: #0056b3;
+}
+
+.navbar-link .link-icon {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2;
 }
 
 .navbar-actions {

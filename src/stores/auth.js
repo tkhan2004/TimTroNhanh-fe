@@ -36,12 +36,12 @@ export const useAuthStore = defineStore('auth', {
     async login(email, password) {
       try {
         const response = await authService.login({ email, password })
-        
+
         // Response từ authService đã là response.data từ axios
         // Structure: { status: 200, message: "...", data: { accessToken, refreshToken, ... } }
         if (response && response.status === 200 && response.data) {
           const authData = response.data
-          
+
           // Lưu tokens
           this.token = authData.accessToken
           this.refreshToken = authData.refreshToken
@@ -49,7 +49,7 @@ export const useAuthStore = defineStore('auth', {
           if (authData.refreshToken) {
             localStorage.setItem('refreshToken', authData.refreshToken)
           }
-          
+
           // Tạo user object từ response
           const userData = {
             id: authData.userId,
@@ -57,14 +57,14 @@ export const useAuthStore = defineStore('auth', {
             fullName: authData.fullName,
             role: authData.role?.toLowerCase() || 'renter' // RENTER -> renter, OWNER -> owner
           }
-          
+
           this.user = userData
           this.isLoggedIn = true
-          
+
           // Lưu user vào localStorage
           localStorage.setItem('user', JSON.stringify(userData))
           localStorage.setItem('isLoggedIn', 'true')
-          
+
           return { success: true, user: userData }
         } else {
           return { success: false, error: response?.message || 'Đăng nhập thất bại' }
@@ -87,13 +87,13 @@ export const useAuthStore = defineStore('auth', {
         console.log('AuthStore register - received response:', response)
         console.log('AuthStore register - response type:', typeof response)
         console.log('AuthStore register - response keys:', Object.keys(response || {}))
-        
+
         // Response từ authService đã là response.data từ axios
         // Có thể có 2 format:
         // 1. { status: 200, message: "...", data: { accessToken, refreshToken, ... } }
         // 2. { accessToken, refreshToken, userId, email, fullName, role } (direct)
         let authData = null
-        
+
         if (response && response.status === 200 && response.data) {
           // Format 1: có wrapper { status, data }
           authData = response.data
@@ -104,10 +104,11 @@ export const useAuthStore = defineStore('auth', {
           // Format 3: nested data
           authData = response.data
         }
-        
+
         if (authData && authData.accessToken) {
           console.log('AuthStore register - authData:', authData)
-          
+          console.log('AuthStore register - role from API:', authData.role)
+
           // Lưu tokens
           this.token = authData.accessToken
           this.refreshToken = authData.refreshToken
@@ -115,21 +116,27 @@ export const useAuthStore = defineStore('auth', {
           if (authData.refreshToken) {
             localStorage.setItem('refreshToken', authData.refreshToken)
           }
-          
+
           // Tạo user object từ response
+          // IMPORTANT: Check if role is present. If not, log a warning.
+          const role = authData.role?.toLowerCase()
+          if (!role) {
+            console.warn('AuthStore register - Role is missing in response, defaulting to renter')
+          }
+
           const user = {
             id: authData.userId || authData.id,
             email: authData.email,
             fullName: authData.fullName,
-            role: (authData.role?.toLowerCase() || 'renter')
+            role: role || 'renter'
           }
-          
+
           this.user = user
           this.isLoggedIn = true
-          
+
           localStorage.setItem('user', JSON.stringify(user))
           localStorage.setItem('isLoggedIn', 'true')
-          
+
           return { success: true, user }
         } else {
           console.warn('Register response structure unexpected:', response)
@@ -143,7 +150,7 @@ export const useAuthStore = defineStore('auth', {
           status: error.response?.status,
           config: error.config
         })
-        
+
         // Xử lý lỗi từ API
         let errorMessage = 'Có lỗi xảy ra khi đăng ký'
         if (error.response?.data?.message) {
@@ -151,12 +158,12 @@ export const useAuthStore = defineStore('auth', {
         } else if (error.message) {
           errorMessage = error.message
         }
-        
+
         // Kiểm tra network error
         if (!error.response) {
           errorMessage = 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng hoặc đảm bảo server đang chạy.'
         }
-        
+
         return { success: false, error: errorMessage }
       }
     },
@@ -177,7 +184,7 @@ export const useAuthStore = defineStore('auth', {
         this.token = null
         this.refreshToken = null
         this.isLoggedIn = false
-        
+
         // Clear localStorage
         localStorage.removeItem('user')
         localStorage.removeItem('token')
@@ -193,7 +200,7 @@ export const useAuthStore = defineStore('auth', {
     setUser(userData) {
       this.user = userData
       this.isLoggedIn = true
-      
+
       localStorage.setItem('user', JSON.stringify(userData))
       localStorage.setItem('isLoggedIn', 'true')
     },
@@ -238,7 +245,7 @@ export const useAuthStore = defineStore('auth', {
       const savedLoginStatus = localStorage.getItem('isLoggedIn')
       const savedToken = localStorage.getItem('token')
       const savedRefreshToken = localStorage.getItem('refreshToken')
-      
+
       if (savedUser && savedLoginStatus === 'true' && savedToken) {
         this.user = JSON.parse(savedUser)
         this.token = savedToken
