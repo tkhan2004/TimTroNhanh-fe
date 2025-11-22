@@ -1,0 +1,108 @@
+.analytics {
+    max-width: 1200px;
+}
+
+.page-header {
+    margin-bottom: 2rem;
+}
+
+.page-title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+    color: #6b7280;
+}
+
+.analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.chart-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.chart-card h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 1rem;
+}
+
+.chart-placeholder {
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f9fafb;
+    border-radius: 8px;
+    color: #6b7280;
+    font-size: 1.125rem;
+}
+
+.occupancy-rate {
+    text-align: center;
+}
+
+.rate-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: conic-gradient(#3b82f6 0deg 270deg, #e5e7eb 270deg 360deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    position: relative;
+}
+
+.rate-circle::before {
+    content: '';
+    width: 80px;
+    height: 80px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+}
+
+.rate-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    position: relative;
+    z-index: 1;
+}
+
+.top-rooms>*+* {
+    margin-top: 0.75rem;
+}
+
+.room-stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.room-stat:last-child {
+    border-bottom: none;
+}
+
+.room-name {
+    font-weight: 500;
+    color: #1f2937;
+}
+
+.room-views {
+    color: #6b7280;
+    font-size: 0.875rem;
+}
