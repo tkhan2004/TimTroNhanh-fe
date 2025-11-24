@@ -42,6 +42,15 @@ export const API_ENDPOINTS = {
     MY_FAVORITES: '/favorites/my-favorites'
   },
 
+  // Chat
+  CHAT: {
+    THREADS: '/chat/threads',
+    THREAD_BY_ID: (threadId) => `/chat/threads/${threadId}`,
+    THREAD_MESSAGES: (threadId) => `/chat/threads/${threadId}/messages`,
+    WS_ENDPOINT: '/ws',
+    WS_NATIVE_ENDPOINT: '/ws-native'
+  },
+
   // Upload
   UPLOAD: {
     AVATAR: '/upload/avatar',
