@@ -29,6 +29,13 @@ const routes = [
         component: () => import('@/pages/guest/About.vue')
       },
       {
+        path: 'chat',
+        name: 'Chat',
+        component: () => import('@/pages/Chat.vue'),
+        beforeEnter: requireAuth,
+        meta: { title: 'Chat' }
+      },
+      {
         path: ':pathMatch(.*)*',
         name: 'NotFound',
         component: () => import('@/pages/guest/NotFound.vue')
@@ -84,6 +91,12 @@ const routes = [
         name: 'OwnerRoomDetail',
         component: () => import('@/pages/landlord/dashboard/OwnerRoomDetail.vue'),
         meta: { layout: 'dashboard', title: 'Chi tiết phòng' }
+      },
+      {
+        path: 'messages',
+        name: 'Messages',
+        component: () => import('@/pages/landlord/dashboard/Messages.vue'),
+        meta: { title: 'Tin nhắn' }
       },
       {
         path: 'analytics',

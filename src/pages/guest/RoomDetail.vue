@@ -121,6 +121,14 @@
         </div>
 
         <div class="contact-methods">
+          <!-- Chat Button -->
+          <ChatButton 
+            v-if="room && room.owner && room.id && room.owner.id"
+            :room-id="room.id"
+            :owner-id="room.owner.id"
+            button-text="Nhắn tin với chủ trọ"
+          />
+
           <button 
             class="contact-button phone-button"
             @click="showPhoneNumber"
@@ -178,6 +186,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import RoomCard from '@/components/RoomCard.vue'
+import ChatButton from '@/components/chat/ChatButton.vue'
 import { useRooms } from '@/composables/useRooms'
 import { favoriteService } from '@/services/favoriteService'
 

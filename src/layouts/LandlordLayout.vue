@@ -3,10 +3,6 @@
     <!-- Header riêng cho chủ trọ -->
     <header class="landlord-header">
       <div class="header-container">
-        <router-link to="/" class="header-logo">
-          <img src="@/assets/logo.png" alt="Logo" />
-          <span>PhongTro247</span>
-        </router-link>
         
         <nav class="header-nav">
           <router-link to="/landlord" class="nav-link" :class="{ active: $route.name === 'Landlord' }">
