@@ -69,7 +69,8 @@ const menuItems = computed(() => {
   const items = [
     { label: 'Tổng quan', route: 'DashboardOverview', icon: 'HomeIcon' },
     { label: 'Đăng tin mới', route: 'PostRoom', icon: 'PlusIcon' },
-    { label: 'Quản lý phòng', route: 'RoomManagement', icon: 'BuildingIcon' }
+    { label: 'Quản lý phòng', route: 'RoomManagement', icon: 'BuildingIcon' },
+    { label: 'Tin nhắn', route: 'Messages', icon: 'MessageIcon' }
   ]
   
   // Chỉ ADMIN mới thấy Analytics
