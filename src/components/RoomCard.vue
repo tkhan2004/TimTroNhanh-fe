@@ -2,6 +2,7 @@
   <router-link 
     :to="{ name: 'RoomDetail', params: { id: room.id } }" 
     class="room-card-horizontal"
+    :class="{ 'expired': room.status === 'EXPIRED' }"
   >
     <!-- Image Section -->
     <div class="room-image-section">
@@ -11,13 +12,15 @@
         class="room-image"
       />
       <span v-if="room.status === 'AVAILABLE'" class="status-badge available">Còn trống</span>
-      <span v-else class="status-badge rented">Đã thuê</span>
+      <span v-else-if="room.status === 'RENTED'" class="status-badge rented">Đã thuê</span>
+      <span v-else-if="room.status === 'EXPIRED'" class="status-badge expired">Hết hạn</span>
       <button 
-        class="favorite-btn" 
+        class="favorite-btn show-on-hover" 
+        :class="{ favorited: isRoomFavorited }"
         @click.prevent="toggleFavorite"
-        title="Thêm vào yêu thích"
+        :title="isRoomFavorited ? 'Bỏ yêu thích' : 'Thêm vào yêu thích'"
       >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg viewBox="0 0 24 24" :fill="isRoomFavorited ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2">
           <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
         </svg>
       </button>
@@ -96,6 +99,9 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import { useFavorites } from '@/composables/useFavorites'
 
 const props = defineProps({
   room: {
@@ -103,6 +109,10 @@ const props = defineProps({
     required: true
   }
 })
+
+const router = useRouter()
+const authStore = useAuthStore()
+const { isFavorite, toggleFavorite: toggleFav } = useFavorites()
 
 // Get first image from imageUrls array or use placeholder
 const roomImage = computed(() => {
@@ -184,9 +194,24 @@ const formatDate = (dateString) => {
   })
 }
 
-const toggleFavorite = () => {
-  // Implement favorite toggle logic
-  console.log('Toggle favorite for room', props.room.id)
+// Check if room is favorited
+const isRoomFavorited = computed(() => isFavorite(props.room.id))
+
+// Toggle favorite
+const toggleFavorite = async () => {
+  // Check if user is logged in
+  if (!authStore.isLoggedIn) {
+    // Redirect to login or show login modal
+    alert('Vui lòng đăng nhập để lưu phòng yêu thích')
+    return
+  }
+
+  try {
+    await toggleFav(props.room.id)
+  } catch (error) {
+    console.error('Error toggling favorite:', error)
+    alert(error.message || 'Không thể lưu phòng yêu thích')
+  }
 }
 </script>
 
@@ -213,24 +238,32 @@ const toggleFavorite = () => {
 .room-image-section {
   position: relative;
   width: 280px;
+  height: 100%;
   flex-shrink: 0;
+  overflow: hidden;
 }
 
 .room-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.room-card-horizontal:hover .room-image {
+  transform: scale(1.05);
 }
 
 .status-badge {
   position: absolute;
   top: 12px;
   left: 12px;
-  padding: 4px 12px;
-  border-radius: 20px;
+  padding: 6px 12px;
+  border-radius: 6px;
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .status-badge.available {
@@ -239,8 +272,23 @@ const toggleFavorite = () => {
 }
 
 .status-badge.rented {
-  background: #ef4444;
+  background: #6b7280;
   color: white;
+}
+
+.status-badge.expired {
+  background: #9ca3af;
+  color: white;
+}
+
+.room-card-horizontal.expired {
+  opacity: 0.6;
+  background-color: #f9fafb;
+  border-color: #e5e7eb;
+}
+
+.room-card-horizontal.expired .room-image {
+  filter: grayscale(100%);
 }
 
 .favorite-btn {
@@ -258,6 +306,15 @@ const toggleFavorite = () => {
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   transition: all 0.2s;
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* Show favorite button on hover or when favorited */
+.room-card-horizontal:hover .favorite-btn.show-on-hover,
+.favorite-btn.favorited {
+  opacity: 1;
+  visibility: visible;
 }
 
 .favorite-btn:hover {
@@ -269,6 +326,15 @@ const toggleFavorite = () => {
   width: 20px;
   height: 20px;
   color: #ef4444;
+}
+
+.favorite-btn.favorited {
+  background: #fee;
+}
+
+.favorite-btn.favorited svg {
+  color: #ef4444;
+  fill: #ef4444;
 }
 
 /* Content Section */

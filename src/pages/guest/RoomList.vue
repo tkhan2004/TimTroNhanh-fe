@@ -32,24 +32,47 @@
             <select 
               v-model="selectedCity" 
               class="filter-select"
+              @change="onCityChange"
             >
               <option value="">Tất cả thành phố</option>
-              <option value="hcm">TP. Hồ Chí Minh</option>
-              <option value="hn">Hà Nội</option>
-              <option value="dn">Đà Nẵng</option>
+              <option 
+                v-for="province in provinces" 
+                :key="province.code" 
+                :value="province.name"
+              >
+                {{ province.name }}
+              </option>
             </select>
 
             <select 
               v-model="selectedDistrict" 
               class="filter-select"
+              @change="onDistrictChange"
+              :disabled="!selectedCity"
             >
               <option value="">Tất cả quận/huyện</option>
               <option 
-                v-for="district in getDistrictsByCity(selectedCity)" 
-                :key="district.value" 
-                :value="district.value"
+                v-for="district in districts" 
+                :key="district.code" 
+                :value="district.name"
               >
-                {{ district.label }}
+                {{ district.name }}
+              </option>
+            </select>
+
+            <select 
+              v-model="selectedWard" 
+              class="filter-select"
+              @change="onWardChange"
+              :disabled="!selectedDistrict"
+            >
+              <option value="">Tất cả phường/xã</option>
+              <option 
+                v-for="ward in wards" 
+                :key="ward.code" 
+                :value="ward.name"
+              >
+                {{ ward.name }}
               </option>
             </select>
           </div>
@@ -88,57 +111,69 @@
           </div>
         </div>
 
-        <!-- Area Filter -->
-        <div class="filter-section">
-          <h3>Diện tích</h3>
-          <div class="area-filters">
-            <div class="area-range-inputs">
-              <input 
-                type="number" 
-                v-model="areaFrom" 
-                placeholder="Từ" 
-                class="area-input"
-              />
-              <span>-</span>
-              <input 
-                type="number" 
-                v-model="areaTo" 
-                placeholder="Đến" 
-                class="area-input"
-              />
-              <span class="area-unit">m²</span>
-            </div>
-            <div class="area-presets">
-              <button 
-                v-for="preset in areaPresets" 
-                :key="preset.label"
-                @click="applyAreaPreset(preset)"
-                class="area-preset-btn"
-              >
-                {{ preset.label }}
-              </button>
+        <!-- Advanced Filter Toggle -->
+        <button 
+          class="advanced-filter-toggle" 
+          @click="showAdvancedFilters = !showAdvancedFilters"
+        >
+          {{ showAdvancedFilters ? 'Thu gọn bộ lọc' : 'Bộ lọc nâng cao' }}
+          <span class="toggle-icon">{{ showAdvancedFilters ? '▲' : '▼' }}</span>
+        </button>
+
+        <!-- Advanced Filters Section -->
+        <div v-show="showAdvancedFilters" class="advanced-filters">
+          <!-- Area Filter -->
+          <div class="filter-section">
+            <h3>Diện tích</h3>
+            <div class="area-filters">
+              <div class="area-range-inputs">
+                <input 
+                  type="number" 
+                  v-model="areaFrom" 
+                  placeholder="Từ" 
+                  class="area-input"
+                />
+                <span>-</span>
+                <input 
+                  type="number" 
+                  v-model="areaTo" 
+                  placeholder="Đến" 
+                  class="area-input"
+                />
+                <span class="area-unit">m²</span>
+              </div>
+              <div class="area-presets">
+                <button 
+                  v-for="preset in areaPresets" 
+                  :key="preset.label"
+                  @click="applyAreaPreset(preset)"
+                  class="area-preset-btn"
+                >
+                  {{ preset.label }}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Utilities Filter -->
-        <div class="filter-section">
-          <h3>Tiện ích</h3>
-          <div class="utilities-grid">
-            <label 
-              v-for="utility in utilities" 
-              :key="utility.id" 
-              class="utility-checkbox"
-            >
-              <input 
-                type="checkbox" 
-                :value="utility.id" 
-                v-model="selectedUtilities"
-              />
-              <span>{{ utility.name }}</span>
-            </label>
-            <div v-if="utilities.length === 0" class="loading-utilities">
-              Đang tải tiện ích...
+          <!-- Utilities Filter -->
+          <div class="filter-section">
+            <h3>Tiện ích</h3>
+            <div class="utilities-grid">
+              <label 
+                v-for="utility in utilities" 
+                :key="utility.id" 
+                class="utility-checkbox"
+              >
+                <input 
+                  type="checkbox" 
+                  :value="utility.id" 
+                  v-model="selectedUtilities"
+                />
+                <span>{{ utility.name }}</span>
+              </label>
+              <div v-if="utilities.length === 0" class="loading-utilities">
+                Đang tải tiện ích...
+              </div>
             </div>
           </div>
         </div>
@@ -215,12 +250,24 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import RoomCard from '@/components/RoomCard.vue'
 import { useRooms } from '@/composables/useRooms'
+import { useFavorites } from '@/composables/useFavorites'
+import { useAuthStore } from '@/stores/auth'
 import { utilityService } from '@/services/utilityService'
+import { vietnamAddressService } from '@/services/vietnamAddressService'
 
 // Use rooms composable
 const { loading, error, rooms, pagination, fetchRooms } = useRooms()
+
+// Use favorites composable
+const { loadFavorites } = useFavorites()
+
+// Auth store
+const authStore = useAuthStore()
+const route = useRoute()
+const router = useRouter()
 
 // Room Types - Map với API enum
 const roomTypes = [
@@ -233,24 +280,60 @@ const roomTypes = [
   { label: 'Studio', value: 'STUDIO' }
 ]
 
-// City and District Data
-const cityDistricts = {
-  hcm: [
-    { label: 'Quận 1', value: 'q1' },
-    { label: 'Quận 2', value: 'q2' },
-    { label: 'Quận 3', value: 'q3' },
-    { label: 'Quận 4', value: 'q4' },
-    { label: 'Quận 5', value: 'q5' }
-  ],
-  hn: [
-    { label: 'Quận Ba Đình', value: 'badinh' },
-    { label: 'Quận Hoàn Kiếm', value: 'hoankiem' },
-    { label: 'Quận Tây Hồ', value: 'tayho' }
-  ],
-  dn: [
-    { label: 'Quận Hải Châu', value: 'haichau' },
-    { label: 'Quận Sơn Trà', value: 'sontra' }
-  ]
+// Address Data
+const provinces = ref([])
+const districts = ref([])
+const wards = ref([])
+const showAdvancedFilters = ref(false)
+
+const loadProvinces = async () => {
+  try {
+    provinces.value = await vietnamAddressService.getProvinces()
+  } catch (error) {
+    console.error('Error loading provinces:', error)
+  }
+}
+
+const onCityChange = async () => {
+  selectedDistrict.value = ''
+  selectedWard.value = ''
+  districts.value = []
+  wards.value = []
+  
+  if (selectedCity.value) {
+    // Find province code by name (since we store name in selectedCity)
+    const province = provinces.value.find(p => p.name === selectedCity.value)
+    if (province) {
+      try {
+        districts.value = await vietnamAddressService.getDistricts(province.code)
+      } catch (error) {
+        console.error('Error loading districts:', error)
+      }
+    }
+  }
+  applyFilters()
+}
+
+const onDistrictChange = async () => {
+  selectedWard.value = ''
+  wards.value = []
+
+  if (selectedDistrict.value) {
+    // Find district code by name
+    const district = districts.value.find(d => d.name === selectedDistrict.value)
+    if (district) {
+      try {
+        wards.value = await vietnamAddressService.getWards(district.code)
+      } catch (error) {
+        console.error('Error loading wards:', error)
+      }
+    }
+  }
+  applyFilters()
+}
+
+const onWardChange = () => {
+  applyFilters()
 }
 
 // Utilities - sẽ load từ API
@@ -290,6 +373,7 @@ const selectedRoomType = ref('')
 const selectedCity = ref('')
 const selectedDistrict = ref('')
 const selectedWard = ref('')
+const keyword = ref('')
 const priceFrom = ref(null)
 const priceTo = ref(null)
 const areaFrom = ref(null)
@@ -311,22 +395,71 @@ const sortDirection = computed(() => {
   return 'desc'
 })
 const currentPage = ref(0)
-const itemsPerPage = ref(12)
+const itemsPerPage = ref(100) // Fetch 100 items for client-side sorting
+const uiItemsPerPage = ref(7) // Display 7 items per page
 
 // Computed Properties
-const totalPages = computed(() => pagination.value.totalPages || 0)
-const paginatedRooms = computed(() => rooms.value || [])
+// 1. Filter and Sort all fetched rooms
+const processedRooms = computed(() => {
+  if (!rooms.value) return []
+  
+  let result = [...rooms.value]
+  
+  // Filter out EXPIRED rooms older than 4 days
+  const now = new Date()
+  const FOUR_DAYS_MS = 4 * 24 * 60 * 60 * 1000
+  
+  result = result.filter(room => {
+    if (room.status === 'EXPIRED') {
+      const statusDate = new Date(room.updatedAt || room.createdAt)
+      if (now - statusDate > FOUR_DAYS_MS) {
+        return false
+      }
+    }
+    return true
+  })
+  
+  // Sort: AVAILABLE -> RENTED -> EXPIRED
+  result.sort((a, b) => {
+    const statusOrder = {
+      'AVAILABLE': 1,
+      'RENTED': 2,
+      'EXPIRED': 3
+    }
+    
+    const orderA = statusOrder[a.status] || 99
+    const orderB = statusOrder[b.status] || 99
+    
+    if (orderA !== orderB) {
+      return orderA - orderB
+    }
+    
+    // Keep original order (usually by date desc)
+    return 0
+  })
+  
+  return result
+})
+
+// 2. Calculate total pages based on processed rooms
+const totalPages = computed(() => {
+  return Math.ceil(processedRooms.value.length / uiItemsPerPage.value) || 0
+})
+
+// 3. Slice for current page
+const paginatedRooms = computed(() => {
+  const start = currentPage.value * uiItemsPerPage.value
+  const end = start + uiItemsPerPage.value
+  return processedRooms.value.slice(start, end)
+})
 
 // Page Title
 const pageTitle = computed(() => {
   const typeLabel = roomTypes.find(type => type.value === selectedRoomType.value)?.label || 'Tất cả phòng'
-  return `${typeLabel} (${pagination.value.totalElements || 0} phòng)`
+  return `${typeLabel} (${processedRooms.value.length} phòng)`
 })
 
 // Methods
-const getDistrictsByCity = (city) => {
-  return cityDistricts[city] || []
-}
 
 const selectRoomType = (type) => {
   selectedRoomType.value = type
@@ -343,14 +476,21 @@ const applyAreaPreset = (preset) => {
   areaTo.value = preset.max
 }
 
-const applyFilters = async () => {
-  currentPage.value = 0 // Reset về trang đầu
+const applyFilters = async (resetPage = true) => {
+  if (resetPage) {
+    currentPage.value = 0 // Reset về trang đầu
+  }
   
+  // Note: We fetch a large batch (itemsPerPage) and handle pagination locally
   const params = {
-    page: currentPage.value,
+    page: 0, // Always fetch page 0 from API
     size: itemsPerPage.value,
     sortBy: sortBy.value,
     sortDirection: sortDirection.value
+  }
+
+  if (keyword.value) {
+    params.keyword = keyword.value
   }
   
   // Add filters
@@ -378,10 +518,19 @@ const applyFilters = async () => {
   if (areaTo.value) {
     params.maxArea = areaTo.value
   }
-  if (selectedUtilities.value.length > 0) {
-    // Note: API có thể không hỗ trợ utilityIds filter trực tiếp
-    // Có thể cần filter ở frontend hoặc backend hỗ trợ
-  }
+  
+  console.log('Applying filters with params:', params)
+  
+  // Update URL
+  const query = { ...params }
+  // Remove empty params
+  Object.keys(query).forEach(key => {
+    if (query[key] === null || query[key] === '' || query[key] === undefined) {
+      delete query[key]
+    }
+  })
+  
+  router.push({ query })
   
   await fetchRooms(params)
 }
@@ -398,20 +547,22 @@ const resetFilters = async () => {
   selectedUtilities.value = []
   sortOption.value = 'newest'
   currentPage.value = 0
-  await applyFilters()
+  await applyFilters(true)
 }
 
 const prevPage = async () => {
   if (currentPage.value > 0) {
     currentPage.value--
-    await applyFilters()
+    // No need to call API, just update currentPage
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 }
 
 const nextPage = async () => {
   if (currentPage.value < totalPages.value - 1) {
     currentPage.value++
-    await applyFilters()
+    // No need to call API, just update currentPage
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 }
 
@@ -423,7 +574,33 @@ watch(sortOption, () => {
 // Load data on mount
 onMounted(async () => {
   await loadUtilities()
+  await loadProvinces()
+  
+  // Parse query params
+  const query = route.query
+  if (query.keyword) keyword.value = query.keyword
+  if (query.roomType) selectedRoomType.value = query.roomType
+  if (query.city) {
+    selectedCity.value = query.city
+    await onCityChange() // Load districts for the selected city
+    // Restore district if present
+    if (query.district) {
+      selectedDistrict.value = query.district
+      await onDistrictChange() // Load wards for the selected district
+    }
+  }
+  if (query.ward) selectedWard.value = query.ward
+  if (query.minPrice) priceFrom.value = query.minPrice
+  if (query.maxPrice) priceTo.value = query.maxPrice
+  if (query.minArea) areaFrom.value = query.minArea
+  if (query.maxArea) areaTo.value = query.maxArea
+
   await applyFilters()
+  
+  // Load favorites if user is logged in
+  if (authStore.isLoggedIn) {
+    await loadFavorites()
+  }
 })
 </script>
 
