@@ -42,7 +42,7 @@
 .more-images-overlay {
   width: 100px;
   height: 100px;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   color: white;
   display: flex;
   align-items: center;
@@ -69,21 +69,41 @@
   align-items: center;
   gap: 8px;
   background-color: #f0f0f0;
-  border: none;
+  border: 2px solid transparent;
   padding: 8px 15px;
   border-radius: 6px;
   white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.favorite-button:hover {
+  background-color: #fee;
+  border-color: #ef4444;
+  transform: translateY(-2px);
+}
+
+.favorite-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .favorite-icon {
   width: 24px;
   height: 24px;
-  fill: #999;
-  transition: fill 0.3s ease;
+  fill: none;
+  stroke: #999;
+  stroke-width: 2;
+  transition: all 0.3s ease;
 }
 
 .favorite-icon.favorited {
-  fill: red;
+  fill: #ef4444;
+  stroke: #ef4444;
+}
+
+.favorite-button:hover .favorite-icon {
+  stroke: #ef4444;
 }
 
 .room-details {
@@ -97,7 +117,8 @@
   flex-wrap: wrap;
 }
 
-.room-price, .room-area {
+.room-price,
+.room-area {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -116,7 +137,8 @@
   margin-bottom: 15px;
 }
 
-.room-description, .room-utilities {
+.room-description,
+.room-utilities {
   margin: 20px 0;
 }
 
@@ -210,7 +232,7 @@
   padding: 20px;
   background: white;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .room-map h3 {
@@ -255,7 +277,7 @@
   border-radius: 6px;
   font-size: 0.9rem;
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   transition: background-color 0.2s;
 }
 
@@ -287,7 +309,8 @@
   padding: 0 20px;
 }
 
-.loading-container, .error-container {
+.loading-container,
+.error-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -307,8 +330,13 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* RESPONSIVE DESIGN */
@@ -319,15 +347,15 @@
     grid-template-columns: 1fr;
     gap: 20px;
   }
-  
+
   .room-gallery {
     grid-column: span 1;
   }
-  
+
   .main-image-display {
     height: 400px;
   }
-  
+
   .contact-methods {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -338,75 +366,76 @@
   .room-detail-container {
     padding: 15px 10px;
   }
-  
+
   .room-detail-content {
     gap: 15px;
   }
-  
+
   .main-image-display {
     height: 300px;
   }
-  
-  .thumbnail-image, .more-images-overlay {
+
+  .thumbnail-image,
+  .more-images-overlay {
     width: 80px;
     height: 80px;
   }
-  
+
   .room-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
   }
-  
+
   .room-title {
     font-size: 1.3rem;
     min-width: auto;
   }
-  
+
   .favorite-button {
     align-self: flex-start;
   }
-  
+
   .room-price-area {
     flex-direction: column;
     gap: 10px;
   }
-  
+
   .utilities-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .owner-info {
     flex-direction: column;
     text-align: center;
     gap: 10px;
   }
-  
+
   .contact-methods {
     grid-template-columns: 1fr;
     gap: 10px;
   }
-  
+
   .contact-button {
     padding: 15px 12px;
     font-size: 0.9rem;
   }
-  
+
   .map-container {
     height: 250px;
   }
-  
+
   .view-larger-map {
     padding: 6px 12px;
     font-size: 0.8rem;
   }
-  
+
   .similar-rooms-grid {
     grid-template-columns: 1fr;
     gap: 15px;
     padding: 0 10px;
   }
-  
+
   .similar-rooms h2 {
     font-size: 1.5rem;
   }
@@ -417,73 +446,74 @@
   .room-detail-container {
     padding: 10px 5px;
   }
-  
+
   .main-image-display {
     height: 250px;
     border-radius: 8px;
   }
-  
-  .thumbnail-image, .more-images-overlay {
+
+  .thumbnail-image,
+  .more-images-overlay {
     width: 60px;
     height: 60px;
   }
-  
+
   .room-title {
     font-size: 1.1rem;
     line-height: 1.3;
   }
-  
+
   .favorite-button {
     padding: 6px 10px;
     font-size: 0.8rem;
   }
-  
+
   .favorite-icon {
     width: 18px;
     height: 18px;
   }
-  
+
   .room-contact {
     padding: 15px;
   }
-  
+
   .owner-avatar {
     width: 50px;
     height: 50px;
   }
-  
+
   .contact-button {
     padding: 12px 8px;
     font-size: 0.8rem;
     gap: 6px;
   }
-  
+
   .contact-button svg {
     width: 16px;
     height: 16px;
   }
-  
+
   .utilities-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .utility-item {
     padding: 6px;
     font-size: 0.9rem;
   }
-  
+
   .room-map {
     padding: 15px;
   }
-  
+
   .map-container {
     height: 200px;
   }
-  
+
   .similar-rooms {
     padding: 20px 0;
   }
-  
+
   .similar-rooms h2 {
     font-size: 1.3rem;
     margin-bottom: 20px;

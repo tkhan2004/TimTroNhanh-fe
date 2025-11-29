@@ -51,12 +51,14 @@
             :disabled="loading"
           >
             <svg 
-              viewBox="0 0 24 24" 
-              :class="['favorite-icon', { 'favorited': room.isFavorited }]"
+              class="favorite-icon"
+              :class="{ 'favorited': isRoomFavorited }"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
             </svg>
-            <span>{{ room.favoriteCount }} Lượt thích</span>
+            <span>{{ isRoomFavorited ? 'Đã yêu thích' : 'Yêu thích' }}</span>
           </button>
         </div>
 
@@ -160,13 +162,16 @@
           </button>
         </div>
       </section>
-
-      <!-- Map Section -->
-      <section class="room-map" v-if="room.latitude && room.longitude">
-        <h3>Vị trí phòng</h3>
-        <div id="map" class="map-container"></div>
-      </section>
     </div>
+
+    <!-- Map Section -->
+    <MapView 
+      v-if="room"
+      :latitude="room.latitude"
+      :longitude="room.longitude"
+      :address="formatAddress(room)"
+      :title="room.title"
+    />
 
     <!-- Similar Rooms Recommendation -->
     <section class="similar-rooms">
@@ -183,69 +188,115 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import RoomCard from '@/components/RoomCard.vue'
 import ChatButton from '@/components/chat/ChatButton.vue'
+import MapView from '@/components/map/MapView.vue'
 import { useRooms } from '@/composables/useRooms'
-import { favoriteService } from '@/services/favoriteService'
+import { useFavorites } from '@/composables/useFavorites'
+import { useAuthStore } from '@/stores/auth'
 
 // Get the route to access route parameters
 const route = useRoute()
-
-// Use rooms composable
-const { loading, error, fetchRoomById } = useRooms()
+const authStore = useAuthStore()
+const { fetchRoomById } = useRooms()
+const { isFavorite, toggleFavorite: toggleFav, loadFavorites } = useFavorites()
 
 // Reactive room data
 const room = ref(null)
+const loading = ref(true)
+const error = ref(null)
 const similarRooms = ref([])
+
+// Favorite status - using ref instead of computed for manual control
+const isRoomFavorited = ref(false)
+
+// Format price
+const formatPrice = (price) => {
+  if (!price || price === 0) {
+    return 'Liên hệ lấy giá'
+  } else if (price >= 1000000) {
+    return (price / 1000000).toFixed(1) + ' triệu/tháng'
+  }
+  return price.toLocaleString('vi-VN') + ' đ/tháng'
+}
 
 // Fetch room details
 const fetchRoomDetails = async () => {
+  loading.value = true
+  error.value = null
+  
   try {
     const roomId = route.params.id
-    const roomData = await fetchRoomById(roomId)
-    room.value = roomData
+    const response = await fetchRoomById(roomId)
+    
+    if (response) {
+      room.value = response
+      // Set initial favorite status
+      isRoomFavorited.value = isFavorite(response.id)
+      console.log('Room loaded, favorite status:', isRoomFavorited.value)
+    } else {
+      error.value = 'Không tìm thấy phòng'
+    }
     
     // Fetch similar rooms (same city/district)
     // TODO: Implement similar rooms API call
     // For now, similarRooms will be empty
   } catch (err) {
     console.error('Error fetching room details:', err)
+    error.value = err.message || 'Không thể tải chi tiết phòng'
+  } finally {
+    loading.value = false
   }
 }
 
 // Toggle favorite
 const toggleFavorite = async () => {
-  if (!room.value) return
+  console.log('Toggle favorite clicked', { room: room.value, isLoggedIn: authStore.isLoggedIn })
+  
+  if (!room.value) {
+    console.log('No room data')
+    return
+  }
+  
+  // Check if user is logged in
+  if (!authStore.isLoggedIn) {
+    console.log('User not logged in')
+    alert('Vui lòng đăng nhập để lưu phòng yêu thích')
+    return
+  }
   
   try {
-    const response = await favoriteService.toggleFavorite(room.value.id)
-    if (response.status === 200 && response.data) {
-      // Update favorite status from response
-      if (response.data.isFavorited !== undefined) {
-        room.value.isFavorited = response.data.isFavorited
-      }
-      if (response.data.favoriteCount !== undefined) {
-        room.value.favoriteCount = response.data.favoriteCount
-      }
-    }
+    console.log('Calling toggleFav for room:', room.value.id, 'current status:', isRoomFavorited.value)
+    
+    // Toggle locally first for immediate UI feedback
+    const newStatus = !isRoomFavorited.value
+    isRoomFavorited.value = newStatus
+    console.log('UI updated to:', newStatus)
+    
+    // Call API in background
+    await toggleFav(room.value.id)
+    console.log('API call completed')
   } catch (err) {
     console.error('Error toggling favorite:', err)
-    alert('Không thể thay đổi trạng thái yêu thích')
+    // Revert on error
+    isRoomFavorited.value = !isRoomFavorited.value
+    alert(err.message || 'Không thể thay đổi trạng thái yêu thích')
   }
 }
 
 // Lifecycle hook to fetch room details when component mounts
-onMounted(fetchRoomDetails)
+onMounted(async () => {
+  // Load favorites first if user is logged in
+  if (authStore.isLoggedIn) {
+    await loadFavorites()
+  }
+  // Then load room details
+  await fetchRoomDetails()
+})
 
 // Existing methods from previous implementation
-const formatPrice = (price) => {
-  return price >= 1000000 
-    ? `${(price / 1000000).toFixed(1)} triệu/tháng` 
-    : `${price.toLocaleString()} đ/tháng`
-}
-
 const formatAddress = (room) => {
   return `${room.address}, ${room.ward}, ${room.district}, ${room.city}`
 }
@@ -279,3 +330,17 @@ const openMessenger = () => {
 
 <!-- Import external CSS file for RoomDetail view styles -->
 <style src="@/assets/css/RoomDetail.css"></style>
+
+<style scoped>
+/* Override to ensure favorite icon styling works */
+.favorite-icon {
+  fill: none !important;
+  stroke: #999 !important;
+  stroke-width: 2 !important;
+}
+
+.favorite-icon.favorited {
+  fill: #ef4444 !important;
+  stroke: #ef4444 !important;
+}
+</style>
