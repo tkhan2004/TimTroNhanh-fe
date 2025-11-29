@@ -141,12 +141,16 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useFavorites } from '@/composables/useFavorites'
+import { useAuthStore } from '@/stores/auth'
 import Hero from '@/components/Hero.vue'
 import RoomCard from '@/components/RoomCard.vue'
 
 const router = useRouter()
+const authStore = useAuthStore()
+const { loadFavorites } = useFavorites()
 
 // Featured Rooms
 const featuredRooms = ref([
@@ -277,6 +281,13 @@ const formatDate = (date) => {
     year: 'numeric'
   })
 }
+
+// Load favorites on mount if logged in
+onMounted(async () => {
+  if (authStore.isLoggedIn) {
+    await loadFavorites()
+  }
+})
 </script> 
 
 <style scoped src="@/assets/css/Home.css"></style>
