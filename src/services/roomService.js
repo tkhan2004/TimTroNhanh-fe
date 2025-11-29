@@ -140,7 +140,7 @@ export const roomService = {
    */
   async toggleRoomStatus(id) {
     try {
-      const response = await apiClient.patch(API_ENDPOINTS.ROOMS.TOGGLE_STATUS(id))
+      const response = await apiClient.patch(API_ENDPOINTS.ROOMS.TOGGLE_STATUS(id), {})
       return response.data
     } catch (error) {
       throw this.handleError(error, 'Không thể thay đổi trạng thái phòng')

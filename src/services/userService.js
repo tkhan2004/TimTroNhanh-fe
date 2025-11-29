@@ -68,6 +68,41 @@ export const userService = {
   },
 
   /**
+   * Upload avatar
+   * @param {File} file - Avatar image file
+   * @returns {Promise<Object>} Avatar URL response
+   */
+  async uploadAvatar(file) {
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const response = await apiClient.post(API_ENDPOINTS.UPLOAD.AVATAR, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+      return response.data
+    } catch (error) {
+      throw this.handleError(error, 'Không thể tải lên ảnh đại diện')
+    }
+  },
+
+  /**
+   * Change password
+   * @param {Object} passwordData - {oldPassword, newPassword}
+   * @returns {Promise<Object>} Success response
+   */
+  async changePassword(passwordData) {
+    try {
+      const response = await apiClient.post('/users/change-password', passwordData)
+      return response.data
+    } catch (error) {
+      throw this.handleError(error, 'Không thể đổi mật khẩu')
+    }
+  },
+
+  /**
    * Xử lý lỗi từ API
    * @param {Error} error - Error object
    * @param {string} defaultMessage - Default error message
