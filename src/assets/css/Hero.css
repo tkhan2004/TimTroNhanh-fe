@@ -165,7 +165,8 @@
 }
 
 .price-range {
-  grid-column: span 2; /* Make price range span two columns */
+  grid-column: span 2;
+  /* Make price range span two columns */
   display: flex;
   align-items: center;
   gap: 5px;
@@ -205,20 +206,24 @@
 
 .promotion-slider {
   display: flex;
-  gap: 15px;
+  gap: 0;
+  /* Remove gap for full width slider */
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
 }
 
 .promotion-item {
-  flex: 0 0 auto;
-  width: calc(100% - 30px);
+  flex: 0 0 100%;
+  /* Full width of container */
+  width: 80%;
   scroll-snap-align: center;
 }
 
 .promotion-item img {
   width: 100%;
+  height: 400px;
+  /* Taller height */
   border-radius: 12px;
   object-fit: cover;
 }

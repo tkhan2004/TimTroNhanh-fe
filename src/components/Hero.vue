@@ -49,9 +49,14 @@
                     v-model="selectedLocation"
                   >
                     <option value="" disabled selected>Chọn địa điểm</option>
-                    <option value="hcm">TP. Hồ Chí Minh</option>
-                    <option value="hn">Hà Nội</option>
-                    <option value="dn">Đà Nẵng</option>
+                    <option value="">Tất cả</option>
+                    <option 
+                      v-for="province in provinces" 
+                      :key="province.code" 
+                      :value="province.name"
+                    >
+                      {{ province.name }}
+                    </option>
                   </select>
                 </div>
               </div>
@@ -126,9 +131,9 @@
     </div>
 
     <div class="hero-promotions">
-      <div class="promotion-slider">
+      <div class="promotion-slider" ref="sliderRef">
         <div class="promotion-item">
-          <img src="https://picsum.photos/seed/promo1/800/200" alt="Khuyến mãi 1" />
+          <img src="https://res.cloudinary.com/dxzk5p80d/image/upload/v1764158732/in-poster-quang-cao1_vcwwho.jpg" alt="Khuyến mãi 1" />
         </div>
         <div class="promotion-item">
           <img src="https://picsum.photos/seed/promo2/800/200" alt="Khuyến mãi 2" />
@@ -143,6 +148,10 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { vietnamAddressService } from '@/services/vietnamAddressService'
+
+const router = useRouter()
 
 const searchTabs = [
   'Tất cả', 
@@ -180,18 +189,78 @@ const performSearch = () => {
     priceTo = customPriceTo.value ? customPriceTo.value * 1000000 : null
   }
 
-  const searchParams = {
-    query: searchQuery.value,
-    location: selectedLocation.value,
-    priceFrom: priceFrom,
-    priceTo: priceTo,
-    area: selectedArea.value,
-    type: searchTabs[activeTab.value]
-  }
+  // Map tabs to room types
+  const roomTypes = ['', 'PHONG_TRO', 'NHA_NGUYEN_CAN', 'CHUNG_CU']
+  const selectedType = roomTypes[activeTab.value]
 
-  console.log('Searching with params:', searchParams)
-  // Implement actual search logic here
+  const query = {}
+  
+  if (searchQuery.value) query.keyword = searchQuery.value
+  if (selectedLocation.value) query.city = selectedLocation.value
+  if (selectedType) query.roomType = selectedType
+  if (selectedArea.value) {
+    const [min, max] = selectedArea.value.split('-')
+    query.minArea = min
+    if (max && max !== '+') query.maxArea = max
+  }
+  
+  if (priceFrom !== null) query.minPrice = priceFrom
+  if (priceTo !== null) query.maxPrice = priceTo
+
+  console.log('Navigating to RoomList with query:', query)
+  router.push({ name: 'RoomList', query })
 }
+
+// Load provinces
+const provinces = ref([])
+const loadProvinces = async () => {
+  try {
+    provinces.value = await vietnamAddressService.getProvinces()
+  } catch (error) {
+    console.error('Error loading provinces:', error)
+  }
+}
+
+// Promotion Slider Logic
+const sliderRef = ref(null)
+let autoPlayInterval = null
+
+const startAutoPlay = () => {
+  autoPlayInterval = setInterval(() => {
+    if (!sliderRef.value) return
+    
+    const slider = sliderRef.value
+    const scrollWidth = slider.scrollWidth
+    const clientWidth = slider.clientWidth
+    const currentScroll = slider.scrollLeft
+    
+    // If we're near the end, scroll back to start
+    if (currentScroll + clientWidth >= scrollWidth - 10) {
+      slider.scrollTo({ left: 0, behavior: 'smooth' })
+    } else {
+      // Otherwise scroll to next item
+      slider.scrollBy({ left: clientWidth, behavior: 'smooth' })
+    }
+  }, 5000) // Change slide every 5 seconds
+}
+
+const stopAutoPlay = () => {
+  if (autoPlayInterval) {
+    clearInterval(autoPlayInterval)
+    autoPlayInterval = null
+  }
+}
+
+import { onMounted, onUnmounted } from 'vue'
+
+onMounted(() => {
+  startAutoPlay()
+  loadProvinces()
+})
+
+onUnmounted(() => {
+  stopAutoPlay()
+})
 </script>
 
 <!-- Import external CSS file for Hero component styles -->
