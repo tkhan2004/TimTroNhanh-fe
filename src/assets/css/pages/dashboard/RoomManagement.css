@@ -121,6 +121,11 @@
     color: #92400e;
 }
 
+.room-status.expired {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
 .room-info {
     padding: 1rem;
 }
@@ -160,6 +165,15 @@
 
 .btn-icon:hover {
     background: #e5e7eb;
+}
+
+.btn-icon:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-icon:disabled:hover {
+    background: #f3f4f6;
 }
 
 .btn-icon.danger:hover {

@@ -47,8 +47,8 @@
         <div v-for="room in rooms" :key="room.id" class="room-item">
           <div class="room-image">
             <img :src="getRoomImage(room)" :alt="room.title" />
-            <div class="room-status" :class="room.status === 'AVAILABLE' ? 'available' : 'occupied'">
-              {{ room.status === 'AVAILABLE' ? 'Trống' : 'Đã thuê' }}
+            <div class="room-status" :class="room.status === 'AVAILABLE' ? 'available' : room.status === 'EXPIRED' ? 'expired' : 'occupied'">
+              {{ room.status === 'AVAILABLE' ? 'Trống' : room.status === 'EXPIRED' ? 'Hết hạn' : 'Đã thuê' }}
             </div>
           </div>
           <div class="room-info">
@@ -62,7 +62,11 @@
                 <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
               </svg>
             </router-link>
-            <button class="btn-icon" title="Chỉnh sửa">
+            <button 
+              class="btn-icon" 
+              :disabled="room.status === 'EXPIRED'"
+              :title="room.status === 'EXPIRED' ? 'Không thể chỉnh sửa phòng hết hạn' : 'Chỉnh sửa'"
+            >
               <svg viewBox="0 0 24 24">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                 <path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
