@@ -9,11 +9,19 @@
       </button>
       
       <div class="chat-header-info" v-if="thread">
-        <img 
-          :src="otherUserAvatar" 
-          :alt="otherUserName"
-          class="header-avatar"
-        />
+        <div class="avatar-wrapper">
+          <img 
+            v-if="otherUserAvatar"
+            :src="otherUserAvatar" 
+            :alt="otherUserName"
+            class="header-avatar"
+          />
+          <div v-else class="header-avatar-placeholder">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+            </svg>
+          </div>
+        </div>
         <div>
           <h3 class="header-title">{{ otherUserName }}</h3>
           <p class="header-subtitle" v-if="thread.room">{{ thread.room.title }}</p>
@@ -143,11 +151,9 @@ const otherUserName = computed(() => {
 
 // Computed property for other user avatar
 const otherUserAvatar = computed(() => {
-  if (!otherUser.value) return 'https://via.placeholder.com/40'
-  
   return otherUser.value.avatarUrl || 
          otherUser.value.avatar ||
-         'https://via.placeholder.com/40'
+         null
 })
 
 const handleSend = () => {
@@ -186,251 +192,5 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.chat-window {
-  display: flex;
-  flex-direction: column;
-  height: 600px;
-  max-height: 80vh;
-  background: white;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-}
-
-/* Header */
-.chat-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem 1.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-}
-
-.back-btn {
-  background: none;
-  border: none;
-  color: white;
-  cursor: pointer;
-  padding: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  transition: background 0.2s;
-}
-
-.back-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.back-btn svg {
-  width: 20px;
-  height: 20px;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.chat-header-info {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex: 1;
-}
-
-.header-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-}
-
-.header-title {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-.header-subtitle {
-  margin: 0;
-  font-size: 0.8125rem;
-  opacity: 0.9;
-}
-
-.connection-status {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.75rem;
-  opacity: 0.8;
-}
-
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #ef4444;
-}
-
-.connection-status.connected .status-dot {
-  background: #10b981;
-}
-
-/* Messages */
-.chat-messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 1.5rem;
-  background: #f9fafb;
-}
-
-.loading-messages,
-.error-messages,
-.empty-messages {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: #6b7280;
-}
-
-.empty-icon {
-  width: 64px;
-  height: 64px;
-  stroke: #d1d5db;
-  fill: none;
-  stroke-width: 1.5;
-  margin-bottom: 1rem;
-}
-
-.empty-subtitle {
-  font-size: 0.875rem;
-  color: #9ca3af;
-}
-
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #667eea;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-.retry-btn {
-  margin-top: 1rem;
-  padding: 0.5rem 1rem;
-  background: #667eea;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.messages-list {
-  display: flex;
-  flex-direction: column;
-}
-
-/* Input */
-.chat-input {
-  display: flex;
-  gap: 0.75rem;
-  padding: 1rem 1.5rem;
-  background: white;
-  border-top: 1px solid #e5e7eb;
-}
-
-.chat-input textarea {
-  flex: 1;
-  padding: 0.75rem 1rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  resize: none;
-  font-family: inherit;
-  font-size: 0.9375rem;
-  max-height: 120px;
-  transition: border-color 0.2s;
-}
-
-.chat-input textarea:focus {
-  outline: none;
-  border-color: #667eea;
-}
-
-.chat-input textarea:disabled {
-  background: #f3f4f6;
-  cursor: not-allowed;
-}
-
-.send-btn {
-  flex-shrink: 0;
-  width: 44px;
-  height: 44px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-}
-
-.send-btn:hover:not(:disabled) {
-  transform: scale(1.05);
-}
-
-.send-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.send-btn svg {
-  width: 20px;
-  height: 20px;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.spinner-small {
-  width: 20px;
-  height: 20px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top: 2px solid white;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Scrollbar */
-.chat-messages::-webkit-scrollbar {
-  width: 6px;
-}
-
-.chat-messages::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-
-.chat-messages::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
-}
-
-.chat-messages::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
+@import '@/assets/css/Chat.css';
 </style>

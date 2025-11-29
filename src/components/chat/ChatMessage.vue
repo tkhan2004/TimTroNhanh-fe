@@ -1,10 +1,18 @@
 <template>
   <div :class="['chat-message', { 'own-message': isOwnMessage }]">
     <div class="message-avatar" v-if="!isOwnMessage">
-      <img 
-        :src="senderAvatar" 
-        :alt="senderName"
-      />
+      <div class="avatar-wrapper">
+        <img 
+          v-if="senderAvatar"
+          :src="senderAvatar" 
+          :alt="senderName"
+        />
+        <div v-else class="message-avatar-placeholder">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+          </svg>
+        </div>
+      </div>
     </div>
 
     <div class="message-content">
@@ -19,10 +27,18 @@
     </div>
 
     <div class="message-avatar" v-if="isOwnMessage">
-      <img 
-        :src="senderAvatar" 
-        :alt="senderName"
-      />
+      <div class="avatar-wrapper">
+        <img 
+          v-if="senderAvatar"
+          :src="senderAvatar" 
+          :alt="senderName"
+        />
+        <div v-else class="message-avatar-placeholder">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+          </svg>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -57,7 +73,7 @@ const senderName = computed(() => {
 const senderAvatar = computed(() => {
   return props.message.sender?.avatarUrl || 
          props.message.sender?.avatar ||
-         'https://via.placeholder.com/40'
+         null
 })
 
 const formatTime = (dateString) => {
@@ -83,88 +99,5 @@ const formatTime = (dateString) => {
 </script>
 
 <style scoped>
-.chat-message {
-  display: flex;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-  align-items: flex-end;
-}
-
-.chat-message.own-message {
-  flex-direction: row-reverse;
-}
-
-.message-avatar {
-  flex-shrink: 0;
-}
-
-.message-avatar img {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.message-content {
-  display: flex;
-  flex-direction: column;
-  max-width: 70%;
-}
-
-.own-message .message-content {
-  align-items: flex-end;
-}
-
-.message-header {
-  margin-bottom: 0.25rem;
-  padding: 0 0.75rem;
-}
-
-.sender-name {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #6b7280;
-}
-
-.message-bubble {
-  background: #f3f4f6;
-  padding: 0.75rem 1rem;
-  border-radius: 1rem;
-  position: relative;
-}
-
-.own-message .message-bubble {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-}
-
-.message-text {
-  margin: 0;
-  font-size: 0.9375rem;
-  line-height: 1.5;
-  word-wrap: break-word;
-}
-
-.message-time {
-  display: block;
-  font-size: 0.6875rem;
-  margin-top: 0.25rem;
-  opacity: 0.7;
-}
-
-.own-message .message-time {
-  text-align: right;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .message-content {
-    max-width: 80%;
-  }
-  
-  .message-avatar img {
-    width: 32px;
-    height: 32px;
-  }
-}
+@import '@/assets/css/Chat.css';
 </style>

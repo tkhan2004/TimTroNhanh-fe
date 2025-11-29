@@ -34,11 +34,19 @@
         :class="['thread-item', { active: activeThreadId === thread.id }]"
         @click="selectThread(thread)"
       >
-        <img 
-          :src="getOtherUserAvatar(thread)" 
-          :alt="getOtherUserName(thread)"
-          class="thread-avatar"
-        />
+        <div class="avatar-container">
+          <img 
+            v-if="getOtherUserAvatar(thread)"
+            :src="getOtherUserAvatar(thread)" 
+            :alt="getOtherUserName(thread)"
+            class="thread-avatar"
+          />
+          <div v-else class="thread-avatar-placeholder">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+            </svg>
+          </div>
+        </div>
         
         <div class="thread-info">
           <div class="thread-header">
@@ -69,6 +77,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import '@/assets/css/Chat.css';
 
 const props = defineProps({
   threads: {
@@ -130,7 +139,7 @@ const getOtherUserAvatar = (thread) => {
   const user = getOtherUser(thread)
   if (!user) return 'https://via.placeholder.com/48'
   
-  return user.avatarUrl || user.avatar || 'https://via.placeholder.com/48'
+  return user.avatarUrl || user.avatar || null
 }
 
 const selectThread = (thread) => {
@@ -173,257 +182,5 @@ const formatTime = (dateString) => {
 </script>
 
 <style scoped>
-.chat-thread-list {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  background: white;
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.thread-list-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.thread-list-header h2 {
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #1f2937;
-}
-
-.refresh-btn {
-  background: none;
-  border: none;
-  padding: 0.5rem;
-  cursor: pointer;
-  border-radius: 6px;
-  transition: background 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.refresh-btn:hover {
-  background: #f3f4f6;
-}
-
-.refresh-btn svg {
-  width: 20px;
-  height: 20px;
-  stroke: #6b7280;
-  fill: none;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.loading-state,
-.error-state,
-.empty-state {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  color: #6b7280;
-}
-
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #667eea;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 1rem;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.empty-icon {
-  width: 64px;
-  height: 64px;
-  stroke: #d1d5db;
-  fill: none;
-  stroke-width: 1.5;
-  margin-bottom: 1rem;
-}
-
-.empty-state h3 {
-  margin: 0 0 0.5rem 0;
-  color: #1f2937;
-  font-size: 1.125rem;
-}
-
-.empty-state p {
-  margin: 0;
-  font-size: 0.875rem;
-}
-
-.retry-btn {
-  margin-top: 1rem;
-  padding: 0.5rem 1rem;
-  background: #667eea;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.875rem;
-}
-
-.thread-list {
-  flex: 1;
-  overflow-y: auto;
-}
-
-.thread-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1rem 1.5rem;
-  cursor: pointer;
-  transition: background 0.2s;
-  border-bottom: 1px solid #f3f4f6;
-  position: relative;
-}
-
-.thread-item:hover {
-  background: #f9fafb;
-}
-
-.thread-item.active {
-  background: #eff6ff;
-  border-left: 3px solid #667eea;
-}
-
-.thread-avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-}
-
-.thread-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.thread-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.25rem;
-}
-
-.thread-name {
-  margin: 0;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: #1f2937;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.thread-time {
-  font-size: 0.75rem;
-  color: #9ca3af;
-  flex-shrink: 0;
-  margin-left: 0.5rem;
-}
-
-.thread-preview {
-  display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
-}
-
-.thread-room {
-  margin: 0;
-  font-size: 0.75rem;
-  color: #667eea;
-  font-weight: 500;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.thread-message {
-  margin: 0;
-  font-size: 0.8125rem;
-  color: #6b7280;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.unread-badge {
-  position: absolute;
-  top: 50%;
-  right: 1.5rem;
-  transform: translateY(-50%);
-  background: #ef4444;
-  color: white;
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 0.25rem 0.5rem;
-  border-radius: 12px;
-  min-width: 20px;
-  text-align: center;
-}
-
-.load-more {
-  padding: 1rem;
-  text-align: center;
-  border-top: 1px solid #e5e7eb;
-}
-
-.load-more button {
-  padding: 0.5rem 1.5rem;
-  background: #f3f4f6;
-  color: #374151;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.875rem;
-  transition: background 0.2s;
-}
-
-.load-more button:hover:not(:disabled) {
-  background: #e5e7eb;
-}
-
-.load-more button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* Scrollbar */
-.thread-list::-webkit-scrollbar {
-  width: 6px;
-}
-
-.thread-list::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-
-.thread-list::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
-}
-
-.thread-list::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
+@import '@/assets/css/Chat.css';
 </style>

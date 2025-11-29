@@ -268,19 +268,20 @@ const handleLogin = async () => {
     const result = await authStore.login(loginForm.value.email, loginForm.value.password)
     
     if (result.success) {
-      // Kiểm tra role
-      const role = result.user.role?.toLowerCase()
-      if (role === 'owner' || role === 'landlord' || role === 'admin') {
+      // Kiểm tra role - chỉ cho phép OWNER và ADMIN
+      const role = result.user.role?.toUpperCase()
+      if (role === 'OWNER' || role === 'ADMIN') {
         // Redirect to dashboard
         router.push({ name: 'DashboardOverview' })
       } else {
-        loginError.value = 'Tài khoản này không phải tài khoản chủ trọ. Vui lòng đăng nhập bằng tài khoản chủ trọ.'
-        authStore.logout()
+        loginError.value = 'Chỉ chủ trọ mới có thể đăng nhập tại trang này. Vui lòng đăng nhập từ trang chủ.'
+        await authStore.logout()
       }
     } else {
       loginError.value = result.error || 'Đăng nhập thất bại'
     }
   } catch (err) {
+    console.error('Login error:', err)
     loginError.value = err.message || 'Có lỗi xảy ra khi đăng nhập'
   } finally {
     isLoggingIn.value = false

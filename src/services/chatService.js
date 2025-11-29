@@ -34,6 +34,7 @@ class ChatService {
             const response = await apiClient.get(API_ENDPOINTS.CHAT.THREADS, {
                 params: { page, size }
             })
+            console.log('Chat threads response:', response.data)
             return response.data
         } catch (error) {
             console.error('Error fetching threads:', error)

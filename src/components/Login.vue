@@ -15,10 +15,6 @@
         <!-- Social Login -->
         <div class="social-login-group">
           <div id="google-signin-button" style="flex:1;"></div>
-          <button @click="loginWithFacebook" class="btn btn-primary w-full login-btn social-login-btn facebook" type="button">
-            <svg viewBox="0 0 24 24"><path fill="#fff" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-            Facebook
-          </button>
         </div>
 
         <!-- Divider -->
@@ -65,16 +61,7 @@
         <div v-if="error" class="alert alert-error">{{ error }}</div>
         <div v-if="success" class="alert alert-success">Đăng nhập thành công!</div>
 
-        <!-- Demo Accounts -->
-        <div class="demo-accounts">
-          <details>
-            <summary>Demo</summary>
-            <div class="demo-list">
-              <div>👤 khach@gmail.com / 123456</div>
-              <div>🏠 chutro@gmail.com / 123456</div>
-            </div>
-          </details>
-        </div>
+      
       </div>
     </div>
   </transition>
@@ -131,25 +118,45 @@ const login = async () => {
     const result = await authStore.login(form.value.email, form.value.password)
     
     if (result.success) {
-      success.value = true
-      setTimeout(() => {
-        closeModal()
-        
-        // Redirect dựa theo role
-        const role = result.user.role?.toLowerCase()
-        if (role === 'owner' || role === 'landlord') {
-          // Chủ trọ -> Dashboard
-          window.location.href = '/dashboard'
-        } else if (role === 'admin') {
-          // Admin -> Dashboard
-          window.location.href = '/dashboard'
+      const role = result.user.role?.toUpperCase()
+      
+      // Kiểm tra trang hiện tại
+      const isLandlordPage = window.location.pathname.includes('/landlord')
+      
+      if (isLandlordPage) {
+        // Đang ở trang landlord - chỉ cho phép OWNER/ADMIN
+        if (role !== 'OWNER' && role !== 'ADMIN') {
+          error.value = 'Chỉ chủ trọ mới có thể đăng nhập tại trang này. Vui lòng đăng nhập từ trang chủ.'
+          await authStore.logout()
+          isLoggingIn.value = false
+          return
         }
-        // Khách thuê không redirect, ở lại trang hiện tại
-      }, 1500)
+        // OWNER/ADMIN -> redirect to dashboard
+        success.value = true
+        setTimeout(() => {
+          closeModal()
+          window.location.href = '/dashboard'
+        }, 1500)
+      } else {
+        // Đang ở trang khách (home, rooms, etc.) - chỉ cho phép RENTER
+        if (role === 'OWNER' || role === 'ADMIN') {
+          error.value = 'Tài khoản chủ trọ vui lòng đăng nhập tại trang dành cho chủ trọ.'
+          await authStore.logout()
+          isLoggingIn.value = false
+          return
+        }
+        // RENTER -> stay on current page
+        success.value = true
+        setTimeout(() => {
+          closeModal()
+          // Không redirect, ở lại trang hiện tại
+        }, 1500)
+      }
     } else {
       error.value = result.error || 'Đăng nhập thất bại'
     }
   } catch (err) {
+    console.error('Login error:', err)
     error.value = err.message || 'Có lỗi xảy ra khi đăng nhập'
   } finally {
     isLoggingIn.value = false
