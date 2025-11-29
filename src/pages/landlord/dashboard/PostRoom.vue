@@ -1,8 +1,8 @@
 <template>
   <div class="post-room">
     <div class="page-header">
-      <h1 class="page-title">Đăng tin cho thuê phòng trọ</h1>
-      <p class="page-subtitle">Tạo tin đăng mới để thu hút khách thuê</p>
+      <h1 class="page-title">{{ pageTitle }}</h1>
+      <p class="page-subtitle">{{ isEditMode ? 'Cập nhật thông tin phòng trọ của bạn' : 'Tạo tin đăng mới để thu hút khách thuê' }}</p>
     </div>
 
     <div class="post-form-container">
@@ -77,84 +77,31 @@
           </div>
         </div>
 
-        <!-- Địa chỉ -->
+        <!-- Địa chỉ & Vị trí -->
         <div class="form-section">
-          <h3 class="section-title">Địa chỉ</h3>
+          <h3 class="section-title">Địa chỉ & Vị trí</h3>
           
-          <div class="form-group">
-            <label class="required">Địa chỉ chi tiết</label>
-            <input 
-              v-model="form.address" 
-              type="text" 
-              placeholder="VD: 123 Đường ABC, Phường XYZ"
-              class="form-input"
-              required
-              maxlength="500"
+          <AddressInput 
+            :model-value="{
+              city: form.city,
+              district: form.district,
+              ward: form.ward,
+              address: form.address
+            }"
+            @update:model-value="onAddressUpdate"
+            :required="true"
+          />
+
+          <div class="form-group map-section">
+            <label>Vị trí trên bản đồ</label>
+            <MapPicker 
+              v-model:latitude="form.latitude"
+              v-model:longitude="form.longitude"
+              :city="form.city"
+              :district="form.district"
+              :ward="form.ward"
+              @address-found="onMapAddressFound"
             />
-            <span class="char-count">{{ form.address.length }}/500</span>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label>Thành phố</label>
-              <input 
-                v-model="form.city" 
-                type="text" 
-                placeholder="VD: TP. Hồ Chí Minh"
-                class="form-input"
-                maxlength="100"
-              />
-            </div>
-
-            <div class="form-group">
-              <label>Quận/Huyện</label>
-              <input 
-                v-model="form.district" 
-                type="text" 
-                placeholder="VD: Quận 1"
-                class="form-input"
-                maxlength="100"
-              />
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>Phường/Xã</label>
-            <input 
-              v-model="form.ward" 
-              type="text" 
-              placeholder="VD: Phường Bến Nghé"
-              class="form-input"
-              maxlength="100"
-            />
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label>Vĩ độ (Latitude)</label>
-              <input 
-                v-model.number="form.latitude" 
-                type="number" 
-                placeholder="VD: 10.7758"
-                class="form-input"
-                step="0.000001"
-                min="-90"
-                max="90"
-              />
-            </div>
-
-            <div class="form-group">
-              <label>Kinh độ (Longitude)</label>
-              <input 
-                v-model.number="form.longitude" 
-                type="number" 
-                placeholder="VD: 106.7039"
-                class="form-input"
-                step="0.000001"
-                min="-180"
-                max="180"
-              />
-            </div>
           </div>
         </div>
 
@@ -261,8 +208,7 @@
             class="btn btn-primary"
             :disabled="isSubmitting || !isFormValid"
           >
-            <span v-if="!isSubmitting">Đăng tin</span>
-            <span v-else>Đang đăng tin...</span>
+            <span>{{ submitButtonText }}</span>
           </button>
         </div>
 
@@ -282,12 +228,15 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { roomService } from '@/services/roomService'
 import { utilityService } from '@/services/utilityService'
 import { uploadService } from '@/services/uploadService'
+import AddressInput from '@/components/form/AddressInput.vue'
+import MapPicker from '@/components/map/MapPicker.vue'
 
 const router = useRouter()
+const route = useRoute()
 
 /** Form data */
 const form = ref({
@@ -315,6 +264,8 @@ const uploadingImages = ref(false)
 const isSubmitting = ref(false)
 const error = ref('')
 const success = ref(false)
+const isEditMode = ref(false)
+const roomId = ref(null)
 
 /** Computed */
 const isFormValid = computed(() => {
@@ -322,6 +273,12 @@ const isFormValid = computed(() => {
          form.value.price && 
          form.value.address && 
          form.value.roomType
+})
+
+const pageTitle = computed(() => isEditMode.value ? 'Cập nhật tin đăng' : 'Đăng tin cho thuê phòng trọ')
+const submitButtonText = computed(() => {
+  if (isSubmitting.value) return isEditMode.value ? 'Đang cập nhật...' : 'Đang đăng tin...'
+  return isEditMode.value ? 'Cập nhật tin' : 'Đăng tin'
 })
 
 /** Load utilities */
@@ -337,6 +294,76 @@ const loadUtilities = async () => {
     error.value = 'Không thể tải danh sách tiện ích'
   } finally {
     loadingUtilities.value = false
+  }
+}
+
+/** Load room details for edit */
+const loadRoomDetails = async (id) => {
+  try {
+    const data = await roomService.getRoomById(id)
+    if (data) {
+      form.value = {
+        title: data.title,
+        description: data.description,
+        price: data.price,
+        area: data.area,
+        address: data.address,
+        city: data.city,
+        district: data.district,
+        ward: data.ward,
+        latitude: data.latitude,
+        longitude: data.longitude,
+        status: data.status,
+        roomType: data.roomType,
+        utilityIds: data.utilities?.map(u => u.id) || [],
+        imageUrls: data.imageUrls || []
+      }
+    }
+  } catch (err) {
+    console.error('Error loading room details:', err)
+    error.value = 'Không thể tải thông tin phòng để chỉnh sửa'
+  }
+}
+
+const onAddressUpdate = (data) => {
+  form.value.city = data.city
+  form.value.district = data.district
+  form.value.ward = data.ward
+  form.value.address = data.address
+}
+
+const onMapAddressFound = (addressData) => {
+  console.log('Nominatim Address Data:', addressData) // Debug log
+
+  // Extract address components from Nominatim data
+  // Nominatim structure varies, so we check multiple fields
+  
+  // 1. City/Province
+  const city = addressData.city || addressData.state || addressData.province
+  if (city && !form.value.city) {
+    form.value.city = city
+  }
+  
+  // 2. District
+  const district = addressData.district || addressData.county || addressData.suburb
+  if (district && !form.value.district) {
+    form.value.district = district
+  }
+  
+  // 3. Ward
+  const ward = addressData.quarter || addressData.neighbourhood || addressData.village || addressData.hamlet
+  if (ward && !form.value.ward) {
+    form.value.ward = ward
+  }
+
+  // 4. Detailed Address (Road + House Number)
+  let detailedAddr = ''
+  if (addressData.house_number) detailedAddr += `${addressData.house_number} `
+  if (addressData.road) detailedAddr += addressData.road
+  
+  // Only update if field is empty
+  if (!form.value.address && detailedAddr) {
+    form.value.address = detailedAddr.trim()
   }
 }
 
@@ -416,8 +443,9 @@ const submitPost = async () => {
     // Upload images first
     let imageUrls = []
     if (selectedFiles.value.length > 0) {
-      imageUrls = await uploadImages()
-    } else if (form.value.imageUrls.length > 0) {
+      const uploadedUrls = await uploadImages()
+      imageUrls = [...form.value.imageUrls.filter(url => url.startsWith('http')), ...uploadedUrls]
+    } else {
       // Use existing URLs if no new files selected
       imageUrls = form.value.imageUrls.filter(url => url.startsWith('http'))
     }
@@ -454,8 +482,14 @@ const submitPost = async () => {
       roomData.longitude = form.value.longitude
     }
 
-    // Create room
-    const response = await roomService.createRoom(roomData)
+    let response
+    if (isEditMode.value) {
+      // Update room
+      response = await roomService.updateRoom(roomId.value, roomData)
+    } else {
+      // Create room
+      response = await roomService.createRoom(roomData)
+    }
     
     if (response.status === 200 && response.data) {
       success.value = true
@@ -463,10 +497,10 @@ const submitPost = async () => {
         router.push({ name: 'RoomManagement' })
       }, 1500)
     } else {
-      error.value = response.message || 'Đăng tin thất bại'
+      error.value = response.message || (isEditMode.value ? 'Cập nhật thất bại' : 'Đăng tin thất bại')
     }
   } catch (err) {
-    error.value = err.message || 'Có lỗi xảy ra khi đăng tin'
+    error.value = err.message || (isEditMode.value ? 'Có lỗi xảy ra khi cập nhật' : 'Có lỗi xảy ra khi đăng tin')
   } finally {
     isSubmitting.value = false
   }
@@ -474,6 +508,11 @@ const submitPost = async () => {
 
 /** Reset form */
 const resetForm = () => {
+  if (isEditMode.value) {
+    loadRoomDetails(roomId.value)
+    return
+  }
+  
   form.value = {
     title: '',
     description: '',
@@ -496,8 +535,15 @@ const resetForm = () => {
 }
 
 /** Load utilities on mount */
-onMounted(() => {
-  loadUtilities()
+onMounted(async () => {
+  await loadUtilities()
+  
+  // Check for edit mode
+  if (route.query.id) {
+    isEditMode.value = true
+    roomId.value = route.query.id
+    await loadRoomDetails(roomId.value)
+  }
 })
 </script>
 

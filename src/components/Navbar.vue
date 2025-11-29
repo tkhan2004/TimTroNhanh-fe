@@ -61,12 +61,11 @@
                 <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
               </svg>
             </router-link>
-            <button class="action-btn favorites-btn" title="Danh sách yêu thích">
+            <router-link to="/favorites" class="action-btn favorites-btn" title="Danh sách yêu thích">
               <svg viewBox="0 0 24 24" class="action-icon">
                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" fill="currentColor"/>
               </svg>
-              <span class="favorites-count">3</span>
-            </button>
+            </router-link>
             <button class="action-btn notification-btn" title="Thông báo">
               <svg viewBox="0 0 24 24" class="action-icon">
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
@@ -92,20 +91,12 @@
             </button>
             
             <!-- Menu cho RENTER -->
-            <button v-if="!isLandlord" class="dropdown-item">
-              <svg viewBox="0 0 24 24" class="dropdown-icon">
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-              </svg>
-              Phòng yêu thích
-            </button>
-            
-            <!-- Menu chung -->
-            <button class="dropdown-item">
+            <router-link v-if="!isLandlord" to="/profile" class="dropdown-item">
               <svg viewBox="0 0 24 24" class="dropdown-icon">
                 <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
               </svg>
               Hồ sơ cá nhân
-            </button>
+            </router-link>
             
             <button @click="handleLogout" class="dropdown-item logout">
               <svg viewBox="0 0 24 24" class="dropdown-icon">

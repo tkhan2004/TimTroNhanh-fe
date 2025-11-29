@@ -29,6 +29,20 @@ const routes = [
         component: () => import('@/pages/guest/About.vue')
       },
       {
+        path: 'profile',
+        name: 'Profile',
+        component: () => import('@/pages/guest/Profile.vue'),
+        beforeEnter: requireAuth,
+        meta: { title: 'Hồ sơ cá nhân' }
+      },
+      {
+        path: 'favorites',
+        name: 'Favorites',
+        component: () => import('@/pages/guest/Favorites.vue'),
+        beforeEnter: requireAuth,
+        meta: { title: 'Phòng yêu thích' }
+      },
+      {
         path: 'chat',
         name: 'Chat',
         component: () => import('@/pages/Chat.vue'),

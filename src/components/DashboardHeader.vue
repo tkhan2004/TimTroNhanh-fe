@@ -17,12 +17,18 @@
         <span v-if="notificationCount > 0" class="notification-badge">{{ notificationCount }}</span>
       </button>
       
-      <div class="user-menu">
-        <img 
-          :src="currentUser?.avatarUrl || 'https://via.placeholder.com/36'" 
-          :alt="currentUser?.fullName || 'User'" 
-          class="user-avatar" 
-        />
+        <div class="user-menu">
+          <img 
+            v-if="currentUser?.avatarUrl"
+            :src="currentUser.avatarUrl" 
+            :alt="currentUser?.fullName || 'User'" 
+            class="user-avatar" 
+          />
+          <div v-else class="user-avatar-placeholder">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+            </svg>
+          </div>
         <div class="user-info">
           <span class="user-name">{{ currentUser?.fullName || 'Chủ trọ' }}</span>
           <span class="user-role">Quản lý</span>
@@ -135,6 +141,23 @@ const toggleSidebar = () => {
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid #e5e7eb;
+}
+
+.user-avatar-placeholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #e5e7eb;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #d1d5db;
+}
+
+.user-avatar-placeholder svg {
+  width: 24px;
+  height: 24px;
 }
 
 .user-info {
