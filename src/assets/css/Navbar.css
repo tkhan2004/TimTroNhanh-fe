@@ -41,8 +41,10 @@
 }
 
 .navbar-brand {
+  flex: 1;
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   padding-left: 4px;
 }
 
@@ -63,11 +65,22 @@
   object-fit: contain;
 }
 
-/* Desktop Menu Links */
+/* Desktop Menu Links (Centered) */
 .navbar-menu {
+  flex: 2;
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Desktop Actions (Right Aligned: 2 Buttons) */
+.navbar-actions {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
 .navbar-link {
