@@ -31,7 +31,7 @@
           <!-- Form -->
           <form @submit.prevent="login" class="login-form">
             <div class="input-field-wrapper">
-              <Icon icon="ph:envelope-simple-bold" class="field-icon" />
+              <Icon icon="ph:envelope-simple-bold" class="auth-field-icon" />
               <input
                 class="form-input"
                 placeholder="Địa chỉ Email"
@@ -42,7 +42,7 @@
             </div>
 
             <div class="input-field-wrapper">
-              <Icon icon="ph:lock-key-bold" class="field-icon" />
+              <Icon icon="ph:lock-key-bold" class="auth-field-icon" />
               <input
                 class="form-input"
                 placeholder="Mật khẩu"
@@ -164,4 +164,4 @@ watch(() => props.showModal, (val) => {
 })
 </script>
 
-<style src="@/assets/css/Login.css"></style>
+<style scoped src="@/assets/css/Login.css"></style>

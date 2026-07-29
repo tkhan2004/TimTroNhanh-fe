@@ -145,7 +145,7 @@
   align-items: center;
 }
 
-.field-icon {
+.auth-field-icon {
   position: absolute;
   left: 14px;
   width: 18px;
@@ -172,7 +172,7 @@
   box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15);
 }
 
-.input-field-wrapper:focus-within .field-icon {
+.input-field-wrapper:focus-within .auth-field-icon {
   color: #0ea5e9;
 }
 

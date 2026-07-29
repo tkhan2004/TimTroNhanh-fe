@@ -41,7 +41,7 @@
           <!-- Form -->
           <form @submit.prevent="register" class="register-form">
             <div class="input-field-wrapper">
-              <Icon icon="ph:user-bold" class="field-icon" />
+              <Icon icon="ph:user-bold" class="auth-field-icon" />
               <input
                 class="form-input"
                 placeholder="Họ và tên"
@@ -53,7 +53,7 @@
 
             <div class="form-row">
               <div class="input-field-wrapper">
-                <Icon icon="ph:envelope-simple-bold" class="field-icon" />
+                <Icon icon="ph:envelope-simple-bold" class="auth-field-icon" />
                 <input
                   class="form-input"
                   placeholder="Email"
@@ -64,7 +64,7 @@
               </div>
 
               <div class="input-field-wrapper">
-                <Icon icon="ph:phone-bold" class="field-icon" />
+                <Icon icon="ph:phone-bold" class="auth-field-icon" />
                 <input
                   class="form-input"
                   placeholder="Số điện thoại"
@@ -77,7 +77,7 @@
 
             <div class="form-row">
               <div class="input-field-wrapper">
-                <Icon icon="ph:lock-key-bold" class="field-icon" />
+                <Icon icon="ph:lock-key-bold" class="auth-field-icon" />
                 <input
                   class="form-input"
                   placeholder="Mật khẩu"
@@ -88,7 +88,7 @@
               </div>
 
               <div class="input-field-wrapper">
-                <Icon icon="ph:shield-check-bold" class="field-icon" />
+                <Icon icon="ph:shield-check-bold" class="auth-field-icon" />
                 <input
                   class="form-input"
                   placeholder="Nhập lại mật khẩu"
@@ -203,4 +203,4 @@ const register = async () => {
 }
 </script>
 
-<style src="@/assets/css/Login.css"></style>
+<style scoped src="@/assets/css/Login.css"></style>
