@@ -1,23 +1,19 @@
 <template>
   <div class="home-page">
-    <Hero 
-      title="Tìm Phòng Trọ Dễ Dàng Nhất" 
-      subtitle="Khám phá hàng ngàn phòng trọ, căn hộ, nhà nguyên căn phù hợp với nhu cầu của bạn"
-      backgroundImage="https://images.unsplash.com/photo-1560448204-e02f5b9b964a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
-      searchPlaceholder="Nhập địa chỉ, quận hoặc khu vực"
-      :quickFilters="[
-        { label: 'Phòng trọ', value: 'room' },
-        { label: 'Nhà nguyên căn', value: 'house' },
-        { label: 'Căn hộ', value: 'apartment' }
-      ]"
-    />
+    <Hero />
 
-    <div class="container">
-      <!-- Featured Rooms Section -->
-      <section class="featured-rooms">
-        <div class="section-header">
-          <h2 class="section-title">Phòng Trọ Nổi Bật</h2>
-          <p class="section-description">Những phòng trọ được nhiều người quan tâm nhất</p>
+    <div class="main-container">
+      <!-- Section 1: Featured Rooms -->
+      <section class="home-section">
+        <div class="section-header-modern">
+          <div class="header-content">
+            <h2 class="section-title">Phòng Trọ Nổi Bật</h2>
+            <p class="section-subtitle">Danh sách phòng trọ chính chủ mới cập nhật với thông tin rõ ràng</p>
+          </div>
+          <router-link to="/rooms" class="btn-link-action">
+            <span>Xem tất cả</span>
+            <Icon icon="ph:arrow-right-bold" class="link-arrow" />
+          </router-link>
         </div>
 
         <div class="rooms-grid">
@@ -29,111 +25,170 @@
         </div>
       </section>
 
-      <!-- Popular Cities Section -->
-      <section class="popular-cities">
-        <div class="section-header">
-          <h2 class="section-title">Địa Điểm Thuê Trọ Phổ Biến</h2>
-          <p class="section-description">Khám phá những thành phố có nhu cầu thuê trọ cao nhất</p>
+      <!-- Section 2: Recommended For You -->
+      <section class="home-section">
+        <div class="section-header-modern">
+          <div class="header-content">
+            <h2 class="section-title">Gợi Ý Dành Cho Bạn</h2>
+            <p class="section-subtitle">Phòng trọ được lựa chọn theo nhu cầu và ngân sách phổ biến</p>
+          </div>
+          
+          <div class="rec-tabs">
+            <button 
+              v-for="(tab, i) in recTabs" 
+              :key="i"
+              @click="activeRecTab = i"
+              :class="['rec-tab-btn', { 'active': activeRecTab === i }]"
+            >
+              {{ tab }}
+            </button>
+          </div>
         </div>
 
-        <div class="cities-grid">
+        <div class="rooms-grid">
+          <RoomCard 
+            v-for="room in recommendedRooms" 
+            :key="`rec-${room.id}`" 
+            :room="room" 
+          />
+        </div>
+      </section>
+
+      <!-- Section 3: Popular Cities -->
+      <section class="home-section">
+        <div class="section-header-modern">
+          <div class="header-content">
+            <h2 class="section-title">Khu Vực Hot Nhất</h2>
+            <p class="section-subtitle">Khám phá phòng trọ tại các trung tâm kinh tế & đại học hàng đầu</p>
+          </div>
+        </div>
+
+        <div class="bento-cities-grid">
           <div 
-            v-for="city in popularCities" 
+            v-for="(city, index) in popularCities" 
             :key="city.id" 
-            class="city-card"
+            :class="['bento-city-item', `bento-item-${index + 1}`]"
             @click="navigateToCity(city.slug)"
           >
-            <div class="city-image-container">
-              <img :src="city.image" :alt="city.name" class="city-image" />
-              <div class="city-overlay">
-                <h3 class="city-name">{{ city.name }}</h3>
-                <p class="city-room-count">{{ city.roomCount }} phòng trọ</p>
+            <img :src="city.image" :alt="city.name" class="bento-city-img" loading="lazy" />
+            <div class="bento-city-overlay">
+              <span class="city-room-badge">{{ city.roomCount }} phòng</span>
+              <h3 class="city-name">{{ city.name }}</h3>
+              <span class="city-explore-link">Khám phá →</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: Editorial News & Magazine Journal (Trình bày phong cách Tạp chí cao cấp) -->
+      <section class="home-section editorial-news-section">
+        <div class="section-header-modern">
+          <div class="header-content">
+            <span class="editorial-kicker">Cẩm Nang & Tạp Chí</span>
+            <h2 class="section-title">Kinh Nghiệm & Điểm Tin Thuê Trọ</h2>
+          </div>
+          <a href="#" class="btn-link-action">
+            <span>Tất cả bài viết</span>
+            <Icon icon="ph:arrow-right-bold" class="link-arrow" />
+          </a>
+        </div>
+
+        <!-- Editorial Magazine Layout Grid -->
+        <div class="editorial-grid">
+          <!-- Featured Main Cover Article (Left 60%) -->
+          <article class="editorial-hero-card" v-if="featuredArticle">
+            <div class="hero-card-image-bg">
+              <img :src="featuredArticle.image" :alt="featuredArticle.title" />
+              <div class="hero-card-gradient"></div>
+            </div>
+
+            <div class="hero-card-content">
+              <div class="hero-card-top-tags">
+                <span class="editorial-badge-pill">{{ featuredArticle.category }}</span>
+                <span class="hero-read-time">
+                  <Icon icon="ph:clock-bold" /> {{ featuredArticle.readTime }}
+                </span>
+              </div>
+
+              <h3 class="hero-card-title">{{ featuredArticle.title }}</h3>
+              <p class="hero-card-excerpt">{{ featuredArticle.excerpt }}</p>
+
+              <div class="hero-card-footer">
+                <div class="author-info">
+                  <div class="author-avatar-circle">
+                    <Icon icon="ph:user-bold" />
+                  </div>
+                  <span class="author-name">Ban Biên Tập Tìm Trọ Nhanh</span>
+                  <span class="dot-separator">•</span>
+                  <span class="article-date">{{ featuredArticle.date }}</span>
+                </div>
+
+                <a href="#" class="btn-editorial-read">
+                  <span>Đọc bài viết</span>
+                  <Icon icon="ph:arrow-up-right-bold" />
+                </a>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
+          </article>
 
-      <!-- Blog Section -->
-      <section class="blog-section">
-        <div class="section-header">
-          <h2 class="section-title">Tin Tức & Hướng Dẫn</h2>
-          <p class="section-description">Những bài viết hữu ích về thuê trọ</p>
-        </div>
+          <!-- Secondary Articles Stack (Right 40%) -->
+          <div class="editorial-list-stack">
+            <article 
+              v-for="(item, idx) in secondaryArticles" 
+              :key="item.id" 
+              class="editorial-list-item"
+            >
+              <span class="item-number">0{{ idx + 1 }}</span>
 
-        <div class="blog-grid">
-          <div 
-            v-for="post in blogPosts" 
-            :key="post.id" 
-            class="blog-card"
-            @click="navigateToBlogPost(post.slug)"
-          >
-            <div class="blog-image-container">
-              <img :src="post.image" :alt="post.title" class="blog-image" />
-            </div>
-            <div class="blog-content">
-              <h3 class="blog-title">{{ post.title }}</h3>
-              <p class="blog-excerpt">{{ post.excerpt }}</p>
-              <div class="blog-meta">
-                <span class="blog-author">{{ post.author }}</span>
-                <span class="blog-date">{{ formatDate(post.date) }}</span>
+              <div class="item-body">
+                <div class="item-meta">
+                  <span class="item-tag">{{ item.category }}</span>
+                  <span class="dot-separator">•</span>
+                  <span class="item-date">{{ item.date }}</span>
+                </div>
+                <h4 class="item-title">{{ item.title }}</h4>
+                <p class="item-desc">{{ item.excerpt }}</p>
               </div>
+
+              <div class="item-thumb-wrapper">
+                <img :src="item.image" :alt="item.title" class="item-thumb-img" />
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 5: Trust & Why Choose Us -->
+      <section class="home-section trust-section">
+        <div class="section-header-modern text-center-header">
+          <h2 class="section-title">Tại sao chọn Tìm Trọ Nhanh?</h2>
+          <p class="section-subtitle">Giải pháp tiện lợi, an toàn và minh bạch cho cả khách thuê lẫn chủ nhà</p>
+        </div>
+
+        <div class="bento-features-grid">
+          <div class="feature-bento-card">
+            <div class="feature-icon-wrapper icon-teal">
+              <Icon icon="ph:shield-check-bold" />
             </div>
-          </div>
-        </div>
-
-        <div class="blog-cta">
-          <router-link to="/blog" class="view-all-posts-btn">
-            Xem tất cả bài viết
-          </router-link>
-        </div>
-      </section>
-
-      <!-- Features Section -->
-      <section class="features">
-        <div class="features-grid">
-          <div class="feature-card">
-            <svg viewBox="0 0 24 24" class="feature-icon">
-              <path d="M12 4.5v15m7.5-7.5h-15"></path>
-            </svg>
-            <h3 class="feature-title">Đăng tin miễn phí</h3>
-            <p class="feature-description">Dễ dàng đăng tin phòng trọ của bạn mà không mất phí</p>
+            <h3 class="feature-title">Chính chủ 100% xác minh</h3>
+            <p class="feature-desc">Mọi bài đăng đều trải qua quy trình kiểm duyệt thông tin giấy tờ đảm bảo an tâm tuyệt đối.</p>
           </div>
 
-          <div class="feature-card">
-            <svg viewBox="0 0 24 24" class="feature-icon">
-              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            <h3 class="feature-title">Xác thực an toàn</h3>
-            <p class="feature-description">Chúng tôi kiểm duyệt và xác thực mọi tin đăng</p>
+          <div class="feature-bento-card">
+            <div class="feature-icon-wrapper icon-sky">
+              <Icon icon="ph:map-pin-line-bold" />
+            </div>
+            <h3 class="feature-title">Bản đồ định vị chuẩn xác</h3>
+            <p class="feature-desc">Tìm phòng chính xác theo bán kính, gần trường học, trạm xe buýt và tiện ích xung quanh.</p>
           </div>
 
-          <div class="feature-card">
-            <svg viewBox="0 0 24 24" class="feature-icon">
-              <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            <h3 class="feature-title">Minh bạch giá</h3>
-            <p class="feature-description">Không phát sinh chi phí ẩn, giá rõ ràng</p>
+          <div class="feature-bento-card">
+            <div class="feature-icon-wrapper icon-amber">
+              <Icon icon="ph:currency-circle-dollar-bold" />
+            </div>
+            <h3 class="feature-title">Không phí môi giới ẩn</h3>
+            <p class="feature-desc">Kết nối làm việc trực tiếp với chủ trọ. Giá cả niêm yết rõ ràng, không phát sinh chi phí phụ.</p>
           </div>
-        </div>
-      </section>
-
-      <!-- Landlord CTA Section -->
-      <section class="landlord-cta">
-        <div class="cta-content">
-          <div class="cta-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-              <polyline points="9 22 9 12 15 12 15 22"/>
-            </svg>
-          </div>
-          <h2 class="cta-title">Bạn là chủ trọ?</h2>
-          <p class="cta-description">
-            Đăng tin miễn phí, quản lý phòng trọ dễ dàng, tiếp cận hàng nghìn khách thuê tiềm năng
-          </p>
-          <router-link to="/landlord" class="btn btn-primary btn-large">
-            Đăng ký / Đăng nhập cho chủ trọ
-          </router-link>
         </div>
       </section>
     </div>
@@ -141,153 +196,165 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useFavorites } from '@/composables/useFavorites'
-import { useAuthStore } from '@/stores/auth'
 import Hero from '@/components/Hero.vue'
 import RoomCard from '@/components/RoomCard.vue'
+import { roomService } from '@/services/roomService'
 
 const router = useRouter()
-const authStore = useAuthStore()
-const { loadFavorites } = useFavorites()
+const featuredRooms = ref([])
+const activeRecTab = ref(0)
 
-// Featured Rooms
-const featuredRooms = ref([
+const recTabs = ['Tất cả', 'Phòng trọ', 'Chung cư', 'Nhà nguyên căn', 'Căn hộ mini', 'Ở ghép']
+
+const sampleRooms = [
   {
-    id: 1,
-    title: 'Phòng trọ đầy đủ tiện nghi tại Quận 1',
-    type: 'room',
-    price: 3500000,
-    area: 25,
-    location: 'Quận 1, TP. Hồ Chí Minh',
-    img: 'https://picsum.photos/300/200?1',
-    isHot: true
+    id: 201,
+    title: 'Phòng trọ studio cao cấp gần ĐH Bách Khoa - Xây mới 100%',
+    price: 3200000,
+    area: 28,
+    type: 'ROOM',
+    status: 'AVAILABLE',
+    address: '40 Tạ Quang Bửu',
+    district: 'Hai Bà Trưng',
+    province: 'Hà Nội',
+    createdAt: new Date().toISOString(),
+    images: ['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80'],
+    utilities: [{ id: 1, name: 'Điều hòa' }, { id: 2, name: 'Nóng lạnh' }]
   },
   {
-    id: 2,
-    title: 'Căn hộ mini gần trung tâm',
-    type: 'apartment',
-    price: 4700000,
-    area: 35,
-    location: 'Quận 3, TP. Hồ Chí Minh',
-    img: 'https://picsum.photos/300/200?2',
-    isHot: true
+    id: 202,
+    title: 'Căn hộ mini full đồ ban công thoáng mát Quận 10',
+    price: 4200000,
+    area: 32,
+    type: 'APARTMENT',
+    status: 'AVAILABLE',
+    address: 'Lý Thường Kiệt',
+    district: 'Quận 10',
+    province: 'TP. Hồ Chí Minh',
+    createdAt: new Date().toISOString(),
+    images: ['https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80'],
+    utilities: [{ id: 1, name: 'Tủ lạnh' }, { id: 2, name: 'Giờ tự do' }]
   },
   {
-    id: 3,
-    title: 'Nhà nguyên căn rộng rãi',
-    type: 'house',
-    price: 8000000,
-    area: 50,
-    location: 'Quận Bình Thạnh, TP. Hồ Chí Minh',
-    img: 'https://picsum.photos/300/200?3',
-    isHot: false
+    id: 203,
+    title: 'Phòng trọ sinh viên sạch sẽ khép kín gần ĐH Quốc Gia',
+    price: 2500000,
+    area: 24,
+    type: 'ROOM',
+    status: 'AVAILABLE',
+    address: 'Xuân Thủy',
+    district: 'Cầu Giấy',
+    province: 'Hà Nội',
+    createdAt: new Date().toISOString(),
+    images: ['https://images.unsplash.com/photo-1560448204-e02f5b9b964a?auto=format&fit=crop&w=800&q=80'],
+    utilities: [{ id: 1, name: 'Khép kín' }, { id: 2, name: 'Máy giặt chung' }]
   },
   {
-    id: 4,
-    title: 'Studio cao cấp view đẹp',
-    type: 'apartment',
-    price: 5500000,
-    area: 40,
-    location: 'Quận 4, TP. Hồ Chí Minh',
-    img: 'https://picsum.photos/300/200?4',
-    isHot: true
+    id: 204,
+    title: 'Căn hộ chung cư 2PN sang trọng dự án Vinhomes Grand Park',
+    price: 6500000,
+    area: 55,
+    type: 'CONDO',
+    status: 'AVAILABLE',
+    address: 'Nguyễn Xiển',
+    district: 'Quận 9',
+    province: 'TP. Hồ Chí Minh',
+    createdAt: new Date().toISOString(),
+    images: ['https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=800&q=80'],
+    utilities: [{ id: 1, name: 'Hồ bơi' }, { id: 2, name: 'Phòng Gym' }, { id: 3, name: 'Thang máy' }]
   }
-])
+]
 
-// Popular Cities
+const recommendedRooms = computed(() => sampleRooms)
+
 const popularCities = ref([
   {
     id: 1,
-    name: 'TP. Hồ Chí Minh',
-    slug: 'ho-chi-minh',
-    roomCount: 5234,
-    image: 'https://picsum.photos/600/400?hcm'
+    name: 'Hà Nội',
+    slug: 'ha-noi',
+    roomCount: '4.850+',
+    image: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=800&q=80'
   },
   {
     id: 2,
-    name: 'Hà Nội',
-    slug: 'ha-noi',
-    roomCount: 3876,
-    image: 'https://picsum.photos/600/400?hn'
+    name: 'TP. Hồ Chí Minh',
+    slug: 'ho-chi-minh',
+    roomCount: '6.200+',
+    image: 'https://images.unsplash.com/photo-1583417319070-4a69db38a482?auto=format&fit=crop&w=800&q=80'
   },
   {
     id: 3,
     name: 'Đà Nẵng',
     slug: 'da-nang',
-    roomCount: 1542,
-    image: 'https://picsum.photos/600/400?dn'
+    roomCount: '1.450+',
+    image: 'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?auto=format&fit=crop&w=800&q=80'
   },
   {
     id: 4,
-    name: 'Cần Thơ',
-    slug: 'can-tho',
-    roomCount: 876,
-    image: 'https://picsum.photos/600/400?ct'
+    name: 'Bình Dương',
+    slug: 'binh-duong',
+    roomCount: '980+',
+    image: 'https://images.unsplash.com/photo-1560448204-e02f5b9b964a?auto=format&fit=crop&w=800&q=80'
   }
 ])
 
-// Blog Posts
-const blogPosts = ref([
-  {
-    id: 1,
-    title: 'Hướng Dẫn Thuê Phòng Trọ An Toàn',
-    slug: 'huong-dan-thue-phong-tro-an-toan',
-    excerpt: 'Những điều cần lưu ý khi thuê phòng trọ để đảm bảo an toàn và tiện nghi.',
-    author: 'Nguyễn Văn A',
-    date: new Date('2023-07-15'),
-    image: 'https://picsum.photos/600/400?blog1'
-  },
+// Editorial Magazine Articles Data
+const featuredArticle = ref({
+  id: 1,
+  title: 'Top 5 điều khoản quan trọng trong hợp đồng thuê trọ bạn tuyệt đối không được xem nhẹ năm 2026',
+  excerpt: 'Phân tích chi tiết quy định về tiền cọc, chi phí phát sinh điện nước sinh hoạt và điều kiện bồi thường giúp bạn bảo vệ quyền lợi pháp lý tối đa.',
+  category: 'Cẩm nang pháp lý',
+  date: '28 Th07, 2026',
+  readTime: '6 phút đọc',
+  image: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=1200&q=80'
+})
+
+const secondaryArticles = ref([
   {
     id: 2,
-    title: 'Kinh Nghiệm Chọn Phòng Trọ Cho Sinh Viên',
-    slug: 'kinh-nghiem-chon-phong-tro-sinh-vien',
-    excerpt: 'Những mẹo vàng giúp sinh viên tìm được phòng trọ phù hợp và tiết kiệm.',
-    author: 'Trần Thị B',
-    date: new Date('2023-07-10'),
-    image: 'https://picsum.photos/600/400?blog2'
+    title: 'Bí quyết hô biến phòng trọ 20m² thành căn Studio phong cách Minimalist cực sang',
+    excerpt: 'Giải pháp chọn đồ nội thất thông minh đa năng và mẹo phối màu ánh sáng mở rộng không gian sống.',
+    category: 'Mẹo trang trí',
+    date: '26 Th07, 2026',
+    image: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=400&q=80'
   },
   {
     id: 3,
-    title: 'Top 5 Khu Vực Cho Thuê Phòng Trọ Tốt Nhất',
-    slug: 'top-5-khu-vuc-cho-thue-phong-tro',
-    excerpt: 'Khám phá những khu vực lý tưởng nhất để thuê phòng trọ tại TP. Hồ Chí Minh.',
-    author: 'Lê Văn C',
-    date: new Date('2023-07-05'),
-    image: 'https://picsum.photos/600/400?blog3'
+    title: 'Nhận biết 4 chiêu trò lừa đảo cọc giữ chỗ phòng trọ phổ biến hiện nay',
+    excerpt: 'Cách tra cứu thông tin chính chủ và quy trình làm việc minh bạch không qua trung gian môi giới.',
+    category: 'Cảnh báo lừa đảo',
+    date: '24 Th07, 2026',
+    image: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=400&q=80'
+  },
+  {
+    id: 4,
+    title: 'Kinh nghiệm tìm bạn ở ghép hòa hợp, văn minh cho tân sinh viên',
+    excerpt: 'Những quy tắc ứng xử, chia sẻ chi phí sinh hoạt và danh mục thống nhất chung giúp sống tập thể êm đẹp.',
+    category: 'Sống tập thể',
+    date: '21 Th07, 2026',
+    image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=400&q=80'
   }
 ])
 
-// Methods
-const navigateToCity = (citySlug) => {
-  router.push({ 
-    name: 'RoomList', 
-    query: { city: citySlug } 
-  })
+const navigateToCity = (slug) => {
+  router.push({ name: 'RoomList', query: { location: slug } })
 }
 
-const navigateToBlogPost = (postSlug) => {
-  router.push({ 
-    name: 'BlogPost', 
-    params: { slug: postSlug } 
-  })
-}
-
-const formatDate = (date) => {
-  return new Date(date).toLocaleDateString('vi-VN', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric'
-  })
-}
-
-// Load favorites on mount if logged in
 onMounted(async () => {
-  if (authStore.isLoggedIn) {
-    await loadFavorites()
+  try {
+    const res = await roomService.getRooms({ page: 0, size: 4, status: 'AVAILABLE' })
+    const fetchedList = res.content || res || []
+    if (fetchedList.length > 0) {
+      featuredRooms.value = fetchedList
+    } else {
+      featuredRooms.value = sampleRooms
+    }
+  } catch (err) {
+    featuredRooms.value = sampleRooms
   }
 })
-</script> 
+</script>
 
 <style scoped src="@/assets/css/Home.css"></style>
