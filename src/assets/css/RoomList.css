@@ -146,43 +146,46 @@
   align-items: start;
 }
 
-/* Left Filter Sidebar Panel */
+/* Left Filter Sidebar Panel (1-Page Screen Fit) */
 .filter-sidebar-panel {
   background: #ffffff;
-  border-radius: 24px;
+  border-radius: 20px;
   border: 1px solid #e2e8f0;
-  padding: 24px;
+  padding: 16px 18px;
   box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 12px;
   position: sticky;
   top: 96px;
+  max-height: calc(100vh - 110px);
+  overflow-y: auto;
+  scrollbar-width: thin;
 }
 
 .sidebar-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-bottom: 14px;
+  padding-bottom: 8px;
   border-bottom: 1px solid #f1f5f9;
 }
 
 .sidebar-title-group {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   color: #0f172a;
 }
 
 .sidebar-title-group h3 {
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   font-weight: 700;
 }
 
 .sidebar-icon {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   color: #0ea5e9;
 }
 
@@ -190,7 +193,7 @@
   background: none;
   border: none;
   color: #ef4444;
-  font-size: 0.8125rem;
+  font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
 }
@@ -198,11 +201,11 @@
 .filter-block {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
 }
 
 .block-title {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 800;
   color: #64748b;
   text-transform: uppercase;
@@ -212,15 +215,15 @@
 .type-button-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 6px;
+  gap: 4px;
 }
 
 .type-select-btn {
-  padding: 7px 10px;
-  border-radius: 10px;
+  padding: 5px 8px;
+  border-radius: 8px;
   border: 1px solid #e2e8f0;
   background: #f8fafc;
-  font-size: 0.8125rem;
+  font-size: 0.78rem;
   font-weight: 600;
   color: #475569;
   cursor: pointer;
@@ -236,16 +239,16 @@
 .stack-inputs {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .sidebar-select {
   width: 100%;
-  padding: 9px 12px;
-  border-radius: 10px;
+  padding: 6px 10px;
+  border-radius: 8px;
   border: 1px solid #e2e8f0;
   background: #f8fafc;
-  font-size: 0.8125rem;
+  font-size: 0.78rem;
   color: #0f172a;
   outline: none;
 }
@@ -253,35 +256,36 @@
 .price-inputs-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .price-input {
   width: 100%;
-  padding: 8px 12px;
-  border-radius: 10px;
+  padding: 6px 10px;
+  border-radius: 8px;
   border: 1px solid #e2e8f0;
   background: #f8fafc;
-  font-size: 0.8125rem;
+  font-size: 0.78rem;
   outline: none;
 }
 
 .range-dash {
   color: #94a3b8;
+  font-size: 0.78rem;
 }
 
 .price-presets-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 6px;
+  gap: 4px;
 }
 
 .preset-chip {
-  padding: 5px 8px;
-  border-radius: 8px;
+  padding: 4px 6px;
+  border-radius: 6px;
   border: 1px solid #f1f5f9;
   background: #f8fafc;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 600;
   color: #64748b;
   cursor: pointer;
@@ -290,32 +294,33 @@
 .utility-checkbox-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  max-height: 160px;
+  gap: 6px;
+  max-height: 90px;
   overflow-y: auto;
+  scrollbar-width: thin;
 }
 
 .checkbox-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.8125rem;
+  gap: 6px;
+  font-size: 0.78rem;
   color: #334155;
   cursor: pointer;
 }
 
 .btn-sidebar-apply {
   width: 100%;
-  padding: 12px;
+  padding: 9px;
   border-radius: 9999px;
   background: #0ea5e9;
   color: #ffffff;
   font-weight: 700;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   border: none;
   cursor: pointer;
   transition: background 0.2s ease;
-  margin-top: 8px;
+  margin-top: 4px;
 }
 
 .btn-sidebar-apply:hover {

@@ -13,7 +13,7 @@
           </p>
         </div>
 
-        <!-- Search Card Console -->
+        <!-- Search Card Console (Compact 2026) -->
         <div class="hero-search-box">
           <!-- Category Tabs -->
           <div class="search-tab-bar">
@@ -32,10 +32,10 @@
             <div class="input-grid">
               <!-- Keyword input -->
               <div class="input-cell keyword-cell">
-                <Icon icon="ph:magnifying-glass-bold" class="field-icon" />
+                <Icon icon="ph:magnifying-glass-bold" class="hero-field-icon" />
                 <input 
                   type="text" 
-                  placeholder="Khu vực, tên đường, trường ĐH..."
+                  placeholder="Khu vực, đường, trường..."
                   class="field-input"
                   v-model="searchQuery"
                   @keyup.enter="handleSearch"
@@ -44,7 +44,7 @@
 
               <!-- Location Select -->
               <div class="input-cell">
-                <Icon icon="ph:map-pin-bold" class="field-icon" />
+                <Icon icon="ph:map-pin-bold" class="hero-field-icon" />
                 <select class="field-select" v-model="selectedLocation">
                   <option value="" disabled selected>Chọn tỉnh thành</option>
                   <option value="">Tất cả tỉnh thành</option>
@@ -60,9 +60,9 @@
 
               <!-- Price Select -->
               <div class="input-cell">
-                <Icon icon="ph:currency-circle-dollar-bold" class="field-icon" />
+                <Icon icon="ph:currency-circle-dollar-bold" class="hero-field-icon" />
                 <select class="field-select" v-model="selectedPrice">
-                  <option value="" disabled selected>Mức giá mong muốn</option>
+                  <option value="" disabled selected>Mức giá</option>
                   <option value="0-1">Dưới 1 triệu</option>
                   <option value="1-3">1 - 3 triệu</option>
                   <option value="3-5">3 - 5 triệu</option>
@@ -78,9 +78,9 @@
               </button>
             </div>
 
-            <!-- Quick Suggestion Tags -->
+            <!-- Quick Suggestion Tags (Compact) -->
             <div class="search-quick-tags">
-              <span class="tags-label">Gợi ý tìm nhanh:</span>
+              <span class="tags-label">Gợi ý nhanh:</span>
               <div class="tags-list">
                 <button 
                   v-for="tag in quickTags" 
@@ -99,22 +99,22 @@
         <div class="hero-trust-bar">
           <div class="trust-item">
             <Icon icon="ph:check-circle-bold" class="trust-icon" />
-            <span>100% Chính chủ đăng bài</span>
+            <span>100% Chính chủ</span>
           </div>
 
           <div class="trust-item">
             <Icon icon="ph:shield-check-bold" class="trust-icon" />
-            <span>Không thu phí môi giới</span>
+            <span>Không phí môi giới</span>
           </div>
 
           <div class="trust-item">
             <Icon icon="ph:map-pin-line-bold" class="trust-icon" />
-            <span>Xác minh địa chỉ thực tế</span>
+            <span>Địa chỉ thực tế</span>
           </div>
         </div>
       </div>
 
-      <!-- Right Column: Visual Photo Card Showcase -->
+      <!-- Right Column: Visual Photo Card Showcase with Balanced Layers -->
       <div class="hero-right-col">
         <div class="photo-card-wrapper">
           <img 
@@ -125,19 +125,34 @@
 
           <!-- Floating Badge Top Left -->
           <div class="floating-card float-top">
-            <Icon icon="ph:house-line-duotone" class="float-icon" />
+            <div class="float-icon-box box-sky">
+              <Icon icon="ph:house-line-duotone" />
+            </div>
             <div class="float-text">
               <strong class="float-num">15.000+</strong>
               <span class="float-desc">Phòng trọ sẵn sàng</span>
             </div>
           </div>
 
-          <!-- Floating Badge Bottom Right -->
-          <div class="floating-card float-bottom">
-            <Icon icon="ph:star-duotone" class="float-icon star-icon" />
+          <!-- Floating Badge Bottom Left: Interactive Map Feature -->
+          <div class="floating-card float-bottom-left">
+            <div class="float-icon-box box-emerald">
+              <Icon icon="ph:map-trifold-duotone" />
+            </div>
+            <div class="float-text">
+              <strong class="float-num">Bản đồ thực tế</strong>
+              <span class="float-desc">Định vị chuẩn 100%</span>
+            </div>
+          </div>
+
+          <!-- Floating Badge Bottom Right: Rating -->
+          <div class="floating-card float-bottom-right">
+            <div class="float-icon-box box-amber">
+              <Icon icon="ph:star-duotone" />
+            </div>
             <div class="float-text">
               <strong class="float-num">4.9 / 5.0</strong>
-              <span class="float-desc">Đánh giá từ người thuê</span>
+              <span class="float-desc">Đánh giá người thuê</span>
             </div>
           </div>
         </div>
@@ -153,18 +168,35 @@ import { vietnamAddressService } from '@/services/vietnamAddressService'
 
 const router = useRouter()
 const activeTab = ref(0)
-const searchTabs = ['Tất cả', 'Phòng trọ', 'Căn hộ mini', 'Chung cư', 'Nhà nguyên căn', 'Ở ghép']
-const quickTags = ['Gần ĐH Bách Khoa', 'Dưới 3 triệu', 'Có ban công', 'Cho nuôi thú cưng']
-
 const searchQuery = ref('')
 const selectedLocation = ref('')
 const selectedPrice = ref('')
 const provinces = ref([])
 
-const applyQuickTag = (tag) => {
-  searchQuery.value = tag
-  handleSearch()
+const searchTabs = [
+  'Tất cả',
+  'Phòng trọ',
+  'Căn hộ mini',
+  'Chung cư',
+  'Nhà nguyên căn',
+  'Ở ghép'
+]
+
+const tabCategoryMap = {
+  0: '',
+  1: 'ROOM',
+  2: 'APARTMENT',
+  3: 'CONDO',
+  4: 'HOUSE',
+  5: 'SHARE'
 }
+
+const quickTags = [
+  'Gần ĐH Bách Khoa',
+  'Dưới 3 triệu',
+  'Có ban công',
+  'Cho nuôi thú cưng'
+]
 
 const handleSearch = () => {
   const query = {}
@@ -172,22 +204,25 @@ const handleSearch = () => {
   if (selectedLocation.value) query.location = selectedLocation.value
   if (selectedPrice.value) query.price = selectedPrice.value
   
-  if (activeTab.value === 1) query.type = 'ROOM'
-  else if (activeTab.value === 2) query.type = 'APARTMENT'
-  else if (activeTab.value === 3) query.type = 'CONDO'
-  else if (activeTab.value === 4) query.type = 'HOUSE'
-  else if (activeTab.value === 5) query.type = 'SHARE'
+  const categoryCode = tabCategoryMap[activeTab.value]
+  if (categoryCode) query.type = categoryCode
 
   router.push({ name: 'RoomList', query })
 }
 
-onMounted(async () => {
-  try {
-    const data = await vietnamAddressService.getProvinces()
-    provinces.value = data || []
-  } catch (err) {
-    console.error('Error fetching provinces:', err)
+const applyQuickTag = (tag) => {
+  if (tag.includes('Bách Khoa')) {
+    searchQuery.value = 'Bách Khoa'
+  } else if (tag.includes('3 triệu')) {
+    selectedPrice.value = '1-3'
+  } else if (tag.includes('ban công') || tag.includes('thú cưng')) {
+    searchQuery.value = tag
   }
+  handleSearch()
+}
+
+onMounted(async () => {
+  provinces.value = await vietnamAddressService.getProvinces()
 })
 </script>
 
