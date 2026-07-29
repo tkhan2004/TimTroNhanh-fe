@@ -1,4 +1,5 @@
 @import '../base.css';
+@import './design-system.css';
 
 /* Reset và base styles */
 * {
