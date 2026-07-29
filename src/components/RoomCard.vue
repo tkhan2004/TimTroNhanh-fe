@@ -11,6 +11,7 @@
         :alt="room.title" 
         class="room-image"
         loading="lazy"
+        @error="handleImageError"
       />
 
       <!-- Top Overlay Badges -->
@@ -115,13 +116,29 @@ const isRoomFavorited = computed(() => {
   return authStore.favorites?.some(fav => fav.id === props.room.id) || false
 })
 
+const fallbackImages = [
+  'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1560448204-e02f5b9b964a?auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=800&q=80'
+]
+
 const roomImage = computed(() => {
-  if (props.room.images && props.room.images.length > 0) {
+  if (props.room?.images && props.room.images.length > 0) {
     const firstImg = props.room.images[0]
-    return typeof firstImg === 'string' ? firstImg : firstImg.url || firstImg.imageUrl
+    const url = typeof firstImg === 'string' ? firstImg : (firstImg?.url || firstImg?.imageUrl)
+    if (url && typeof url === 'string' && url.trim() !== '' && !url.includes('placeholder')) {
+      return url
+    }
   }
-  return '/placeholder-room.jpg'
+  const idx = Math.abs(props.room?.id || 0) % fallbackImages.length
+  return fallbackImages[idx]
 })
+
+const handleImageError = (e) => {
+  const idx = Math.abs(props.room?.id || 0) % fallbackImages.length
+  e.target.src = fallbackImages[idx]
+}
 
 const fullAddress = computed(() => {
   const parts = []
