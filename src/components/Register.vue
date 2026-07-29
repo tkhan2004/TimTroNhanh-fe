@@ -1,82 +1,131 @@
 <template>
   <!-- Register Modal -->
-  <transition name="modal">
-    <div v-if="showModal" class="modal-overlay" @click="closeModal">
-      <div class="modal-content register-modal" @click.stop>
-        <div class="modal-header">
-          <div class="modal-logo">
-            <img src="../assets/logo.png" alt="Thuê Trọ Logo" class="login-logo" width="50px"/>
-          </div>
-          <h2>Tạo tài khoản</h2>
-          <p class="welcome-text">Tham gia cộng đồng thuê trọ</p>
-          <button @click="closeModal" class="modal-close">×</button>
-        </div>
-
-        <form @submit.prevent="register" class="register-form">
-          <div class="form-row">
-            <input
-              class="form-input"
-              placeholder="Họ tên"
-              v-model="form.name"
-              type="text"
-              required
-            />
-            <input
-              class="form-input"
-              placeholder="Email"
-              v-model="form.email"
-              type="email"
-              required
-            />
-          </div>
-          <div class="form-row">
-            <input
-              class="form-input"
-              placeholder="Số điện thoại"
-              v-model="form.phone"
-              type="tel"
-              required
-            />
-            <input
-              class="form-input"
-              placeholder="Mật khẩu"
-              v-model="form.password"
-              type="password"
-              required
-            />
-          </div>
-          <input
-            class="form-input"
-            placeholder="Xác nhận mật khẩu"
-            v-model="form.confirmPassword"
-            type="password"
-            required
-          />
-          <label class="terms-agreement">
-            <input type="checkbox" v-model="agreeTerms" required>
-            <span class="checkmark"></span>
-            <span>Đồng ý điều khoản</span>
-          </label>
-          <button type="submit" class="btn btn-primary w-full" :disabled="isRegistering">
-            <span v-if="!isRegistering">Tạo tài khoản</span>
-            <span v-else>Đang đăng ký...</span>
+  <Teleport to="body">
+    <transition name="modal">
+      <div v-if="showModal" class="modal-overlay" @click="closeModal">
+        <div class="modal-content register-modal" @click.stop>
+          <!-- Close Button -->
+          <button @click="closeModal" class="modal-close" aria-label="Đóng">
+            <Icon icon="ph:x-bold" />
           </button>
-        </form>
 
-        <div class="modal-footer">
-          <p>Đã có tài khoản? 
-            <button @click="switchToLogin" class="link-btn">Đăng nhập</button>
-          </p>
-        </div>
+          <!-- Header -->
+          <div class="modal-header">
+            <div class="modal-logo">
+              <img src="../assets/logo.png" alt="Thuê Trọ Logo" class="login-logo" />
+            </div>
+            <h2 class="modal-title">Tạo tài khoản mới</h2>
+            <p class="welcome-text">Tham gia cộng đồng tìm & cho thuê trọ nhanh chóng</p>
+          </div>
 
-        <!-- Alerts -->
-        <div v-if="error" class="alert alert-error">{{ error }}</div>
-        <div v-if="success" class="alert alert-success">
-          Tài khoản đã được tạo thành công!
+          <!-- Role Selector Tabs -->
+          <div class="role-selector-bar">
+            <button 
+              type="button"
+              @click="form.role = 'ROLE_USER'"
+              :class="['role-tab', { 'active': form.role === 'ROLE_USER' }]"
+            >
+              <Icon icon="ph:user-bold" />
+              <span>Khách tìm trọ</span>
+            </button>
+            <button 
+              type="button"
+              @click="form.role = 'ROLE_LANDLORD'"
+              :class="['role-tab', { 'active': form.role === 'ROLE_LANDLORD' }]"
+            >
+              <Icon icon="ph:house-line-bold" />
+              <span>Chủ nhà / Cho thuê</span>
+            </button>
+          </div>
+
+          <!-- Form -->
+          <form @submit.prevent="register" class="register-form">
+            <div class="input-field-wrapper">
+              <Icon icon="ph:user-bold" class="auth-field-icon" />
+              <input
+                class="form-input"
+                placeholder="Họ và tên"
+                v-model="form.name"
+                type="text"
+                required
+              />
+            </div>
+
+            <div class="form-row">
+              <div class="input-field-wrapper">
+                <Icon icon="ph:envelope-simple-bold" class="auth-field-icon" />
+                <input
+                  class="form-input"
+                  placeholder="Email"
+                  v-model="form.email"
+                  type="email"
+                  required
+                />
+              </div>
+
+              <div class="input-field-wrapper">
+                <Icon icon="ph:phone-bold" class="auth-field-icon" />
+                <input
+                  class="form-input"
+                  placeholder="Số điện thoại"
+                  v-model="form.phone"
+                  type="tel"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="input-field-wrapper">
+                <Icon icon="ph:lock-key-bold" class="auth-field-icon" />
+                <input
+                  class="form-input"
+                  placeholder="Mật khẩu"
+                  v-model="form.password"
+                  type="password"
+                  required
+                />
+              </div>
+
+              <div class="input-field-wrapper">
+                <Icon icon="ph:shield-check-bold" class="auth-field-icon" />
+                <input
+                  class="form-input"
+                  placeholder="Nhập lại mật khẩu"
+                  v-model="form.confirmPassword"
+                  type="password"
+                  required
+                />
+              </div>
+            </div>
+
+            <label class="terms-agreement">
+              <input type="checkbox" v-model="agreeTerms" required />
+              <span>Tôi đồng ý với <a href="#">Điều khoản dịch vụ</a> và <a href="#">Chính sách bảo mật</a></span>
+            </label>
+
+            <button type="submit" class="btn-auth-primary" :disabled="isRegistering">
+              <span v-if="!isRegistering">Đăng ký tài khoản</span>
+              <span v-else>Đang khởi tạo...</span>
+            </button>
+          </form>
+
+          <!-- Footer Switch -->
+          <div class="modal-footer">
+            <p>Đã có tài khoản? 
+              <button @click="switchToLogin" class="link-btn">Đăng nhập ngay</button>
+            </p>
+          </div>
+
+          <!-- Alerts -->
+          <div v-if="error" class="alert alert-error">{{ error }}</div>
+          <div v-if="success" class="alert alert-success">
+            Tài khoản đã được khởi tạo thành công!
+          </div>
         </div>
       </div>
-    </div>
-  </transition>
+    </transition>
+  </Teleport>
 </template>
 
 <script setup>
@@ -91,93 +140,67 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['close', 'switchToLogin'])
-
 const authStore = useAuthStore()
 
-/** Form data đăng ký */
 const form = ref({ 
   name: '', 
   email: '', 
   phone: '', 
   password: '', 
-  confirmPassword: '' 
+  confirmPassword: '',
+  role: 'ROLE_USER'
 })
+
+const agreeTerms = ref(false)
 const success = ref(false)
 const error = ref('')
-const agreeTerms = ref(false)
 const isRegistering = ref(false)
 
-/** Đóng modal và reset form */
 const closeModal = () => {
   emit('close')
   success.value = false
   error.value = ''
-  form.value = { name: '', email: '', phone: '', password: '', confirmPassword: '' }
+  form.value = { name: '', email: '', phone: '', password: '', confirmPassword: '', role: 'ROLE_USER' }
 }
 
-/** Chuyển sang form đăng nhập */
 const switchToLogin = () => {
   emit('switchToLogin')
 }
 
-/** Xử lý đăng ký */
 const register = async () => {
-  // Validation
-  if (!form.value.name || !form.value.email || !form.value.password) {
-    error.value = 'Vui lòng nhập đầy đủ thông tin'
-    return
-  }
+  error.value = ''
+  success.value = false
 
   if (form.value.password !== form.value.confirmPassword) {
-    error.value = 'Mật khẩu xác nhận không khớp!'
-    return
-  }
-
-  if (form.value.password.length < 6) {
-    error.value = 'Mật khẩu phải có ít nhất 6 ký tự'
-    return
-  }
-
-  if (!agreeTerms.value) {
-    error.value = 'Vui lòng đồng ý với điều khoản'
+    error.value = 'Mật khẩu xác nhận không khớp'
     return
   }
 
   isRegistering.value = true
-  error.value = ''
-  success.value = false
 
   try {
-    const registerData = {
+    const res = await authStore.register({
       fullName: form.value.name,
       email: form.value.email,
+      phone: form.value.phone,
       password: form.value.password,
-      phone: form.value.phone || undefined,
-      role: 'RENTER' // Mặc định là RENTER
-    }
+      role: form.value.role
+    })
 
-    console.log('Register data:', registerData)
-    const result = await authStore.register(registerData)
-    console.log('Register result:', result)
-    
-    if (result.success) {
+    if (res && res.success !== false) {
       success.value = true
       setTimeout(() => {
-        closeModal()
-        // Có thể redirect hoặc chuyển sang login
         switchToLogin()
-      }, 1500)
+      }, 1000)
     } else {
-      error.value = result.error || 'Đăng ký thất bại'
-      console.error('Register failed:', result.error)
+      error.value = res?.message || 'Đăng ký thất bại. Email hoặc SĐT có thể đã tồn tại.'
     }
   } catch (err) {
-    console.error('Register exception:', err)
-    error.value = err.message || 'Có lỗi xảy ra khi đăng ký'
+    error.value = err?.response?.data?.message || 'Có lỗi xảy ra trong quá trình đăng ký'
   } finally {
     isRegistering.value = false
   }
 }
 </script>
 
-<style src="@/assets/css/Register.css"></style>
+<style scoped src="@/assets/css/Login.css"></style>

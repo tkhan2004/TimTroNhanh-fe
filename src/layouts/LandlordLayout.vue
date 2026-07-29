@@ -135,6 +135,6 @@ onMounted(() => {
 })
 </script>
 
-<style scoped src="@/assets/css/layouts/LandlordLayout.css"></style>
+<style scoped src="@/assets/css/LardlordLayout.css"></style>
 
 

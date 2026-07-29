@@ -1,145 +1,160 @@
 <template>
-  <div class="hero-container">
-    <div class="hero-background">
-      <div class="hero-overlay"></div>
-      <div class="hero-content">
-        <div class="hero-text">
-          <h1 class="hero-title">
-            <span class="hero-title-highlight">Ở TRỌ KHÔNG LO</span>
-            <br>
-            CỨ ĐỂ CHÚNG TÔI LO CHỖ Ở CHO BẠN
+  <div class="hero-wrapper">
+    <div class="hero-inner container">
+      <!-- Left Column: Copy & Search Console -->
+      <div class="hero-left-col">
+        <div class="hero-header-text">
+          <h1 class="hero-heading">
+            Tìm phòng trọ, căn hộ <br />
+            <span class="text-accent">ưng ý & phù hợp nhất</span>
           </h1>
-          <p class="hero-subtitle">
-            Hàng nghìn phòng trọ được cập nhật mỗi ngày trên toàn quốc
-            <br>
-            Cùng bạn tìm nơi ở an tâm từ những người cho thuê uy tín
+          <p class="hero-lead">
+            Kết nối trực tiếp người thuê với chủ nhà uy tín trên toàn quốc. Thông tin giá cả, diện tích và vị trí được xác thực minh bạch.
           </p>
         </div>
 
-        <div class="hero-search-container">
-          <div class="hero-search-tabs">
+        <!-- Search Card Console (Compact 2026) -->
+        <div class="hero-search-box">
+          <!-- Category Tabs -->
+          <div class="search-tab-bar">
             <button 
               v-for="(tab, index) in searchTabs" 
               :key="index"
               @click="activeTab = index"
-              :class="['search-tab', { 'active': activeTab === index }]"
+              :class="['tab-btn', { 'active': activeTab === index }]"
             >
               {{ tab }}
             </button>
           </div>
 
-          <div class="hero-search-form">
-            <div class="search-inputs">
-              <div class="search-input-group">
-                <svg viewBox="0 0 24 24" class="search-icon">
-                  <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
+          <!-- Main Input Fields -->
+          <div class="search-form-body">
+            <div class="input-grid">
+              <!-- Keyword input -->
+              <div class="input-cell keyword-cell">
+                <Icon icon="ph:magnifying-glass-bold" class="hero-field-icon" />
                 <input 
                   type="text" 
-                  placeholder="Nhập địa chỉ, quận, thành phố"
-                  class="search-input"
+                  placeholder="Khu vực, đường, trường..."
+                  class="field-input"
                   v-model="searchQuery"
+                  @keyup.enter="handleSearch"
                 />
               </div>
 
-              <div class="search-input-group">
-                <div class="select-wrapper">
-                  <select 
-                    class="search-select" 
-                    v-model="selectedLocation"
+              <!-- Location Select -->
+              <div class="input-cell">
+                <Icon icon="ph:map-pin-bold" class="hero-field-icon" />
+                <select class="field-select" v-model="selectedLocation">
+                  <option value="" disabled selected>Chọn tỉnh thành</option>
+                  <option value="">Tất cả tỉnh thành</option>
+                  <option 
+                    v-for="province in provinces" 
+                    :key="province.code" 
+                    :value="province.name"
                   >
-                    <option value="" disabled selected>Chọn địa điểm</option>
-                    <option value="">Tất cả</option>
-                    <option 
-                      v-for="province in provinces" 
-                      :key="province.code" 
-                      :value="province.name"
-                    >
-                      {{ province.name }}
-                    </option>
-                  </select>
-                </div>
+                    {{ province.name }}
+                  </option>
+                </select>
               </div>
 
-              <div class="search-input-group">
-                <div class="select-wrapper">
-                  <select 
-                    class="search-select" 
-                    v-model="selectedPrice"
-                    @change="handlePriceChange"
-                  >
-                    <option value="" disabled selected>Mức giá</option>
-                    <option value="0-1">Dưới 1 triệu</option>
-                    <option value="1-3">1-3 triệu</option>
-                    <option value="3-5">3-5 triệu</option>
-                    <option value="5-10">5-10 triệu</option>
-                    <option value="10+">Trên 10 triệu</option>
-                    <option value="custom">Tùy chọn</option>
-                  </select>
-                </div>
+              <!-- Price Select -->
+              <div class="input-cell">
+                <Icon icon="ph:currency-circle-dollar-bold" class="hero-field-icon" />
+                <select class="field-select" v-model="selectedPrice">
+                  <option value="" disabled selected>Mức giá</option>
+                  <option value="0-1">Dưới 1 triệu</option>
+                  <option value="1-3">1 - 3 triệu</option>
+                  <option value="3-5">3 - 5 triệu</option>
+                  <option value="5-10">5 - 10 triệu</option>
+                  <option value="10+">Trên 10 triệu</option>
+                </select>
               </div>
 
-              <div 
-                v-if="showCustomPriceInput" 
-                class="search-input-group price-range"
-              >
-                <div class="price-inputs">
-                  <input 
-                    type="number" 
-                    placeholder="Từ" 
-                    class="price-input"
-                    v-model="customPriceFrom"
-                    min="0"
-                  />
-                  <span class="price-separator">-</span>
-                  <input 
-                    type="number" 
-                    placeholder="Đến" 
-                    class="price-input"
-                    v-model="customPriceTo"
-                    min="0"
-                  />
-                </div>
-                <span class="price-unit">triệu</span>
-              </div>
-
-              <div class="search-input-group">
-                <div class="select-wrapper">
-                  <select 
-                    class="search-select" 
-                    v-model="selectedArea"
-                  >
-                    <option value="" disabled selected>Diện tích</option>
-                    <option value="0-20">Dưới 20m²</option>
-                    <option value="20-30">20-30m²</option>
-                    <option value="30-50">30-50m²</option>
-                    <option value="50+">Trên 50m²</option>
-                  </select>
-                </div>
-              </div>
-
-              <button class="search-button" @click="performSearch">
-                <svg viewBox="0 0 24 24" class="search-button-icon">
-                  <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
-                Tìm kiếm
+              <!-- Search CTA -->
+              <button @click="handleSearch" class="btn-search-action">
+                <Icon icon="ph:magnifying-glass-bold" class="cta-icon" />
+                <span>Tìm kiếm</span>
               </button>
+            </div>
+
+            <!-- Quick Suggestion Tags (Compact) -->
+            <div class="search-quick-tags">
+              <span class="tags-label">Gợi ý nhanh:</span>
+              <div class="tags-list">
+                <button 
+                  v-for="tag in quickTags" 
+                  :key="tag"
+                  @click="applyQuickTag(tag)"
+                  class="tag-btn"
+                >
+                  {{ tag }}
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
 
-    <div class="hero-promotions">
-      <div class="promotion-slider" ref="sliderRef">
-        <div class="promotion-item">
-          <img src="https://res.cloudinary.com/dxzk5p80d/image/upload/v1764158732/in-poster-quang-cao1_vcwwho.jpg" alt="Khuyến mãi 1" />
+        <!-- Trust Features Strip -->
+        <div class="hero-trust-bar">
+          <div class="trust-item">
+            <Icon icon="ph:check-circle-bold" class="trust-icon" />
+            <span>100% Chính chủ</span>
+          </div>
+
+          <div class="trust-item">
+            <Icon icon="ph:shield-check-bold" class="trust-icon" />
+            <span>Không phí môi giới</span>
+          </div>
+
+          <div class="trust-item">
+            <Icon icon="ph:map-pin-line-bold" class="trust-icon" />
+            <span>Địa chỉ thực tế</span>
+          </div>
         </div>
-        <div class="promotion-item">
-          <img src="https://picsum.photos/seed/promo2/800/200" alt="Khuyến mãi 2" />
-        </div>
-        <div class="promotion-item">
-          <img src="https://picsum.photos/seed/promo3/800/200" alt="Khuyến mãi 3" />
+      </div>
+
+      <!-- Right Column: Visual Photo Card Showcase with Balanced Layers -->
+      <div class="hero-right-col">
+        <div class="photo-card-wrapper">
+          <img 
+            src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1000&q=80" 
+            alt="Căn hộ phòng trọ hiện đại" 
+            class="hero-main-photo"
+          />
+
+          <!-- Floating Badge Top Left -->
+          <div class="floating-card float-top">
+            <div class="float-icon-box box-sky">
+              <Icon icon="ph:house-line-duotone" />
+            </div>
+            <div class="float-text">
+              <strong class="float-num">15.000+</strong>
+              <span class="float-desc">Phòng trọ sẵn sàng</span>
+            </div>
+          </div>
+
+          <!-- Floating Badge Bottom Left: Interactive Map Feature -->
+          <div class="floating-card float-bottom-left">
+            <div class="float-icon-box box-emerald">
+              <Icon icon="ph:map-trifold-duotone" />
+            </div>
+            <div class="float-text">
+              <strong class="float-num">Bản đồ thực tế</strong>
+              <span class="float-desc">Định vị chuẩn 100%</span>
+            </div>
+          </div>
+
+          <!-- Floating Badge Bottom Right: Rating -->
+          <div class="floating-card float-bottom-right">
+            <div class="float-icon-box box-amber">
+              <Icon icon="ph:star-duotone" />
+            </div>
+            <div class="float-text">
+              <strong class="float-num">4.9 / 5.0</strong>
+              <span class="float-desc">Đánh giá người thuê</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -147,121 +162,68 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { vietnamAddressService } from '@/services/vietnamAddressService'
 
 const router = useRouter()
-
-const searchTabs = [
-  'Tất cả', 
-  'Nhà trọ, phòng trọ', 
-  'Nhà nguyên căn', 
-  'Căn hộ'
-]
-
 const activeTab = ref(0)
 const searchQuery = ref('')
 const selectedLocation = ref('')
 const selectedPrice = ref('')
-const selectedArea = ref('')
+const provinces = ref([])
 
-// Custom price range
-const showCustomPriceInput = ref(false)
-const customPriceFrom = ref(null)
-const customPriceTo = ref(null)
+const searchTabs = [
+  'Tất cả',
+  'Phòng trọ',
+  'Căn hộ mini',
+  'Chung cư',
+  'Nhà nguyên căn',
+  'Ở ghép'
+]
 
-const handlePriceChange = () => {
-  showCustomPriceInput.value = selectedPrice.value === 'custom'
+const tabCategoryMap = {
+  0: '',
+  1: 'ROOM',
+  2: 'APARTMENT',
+  3: 'CONDO',
+  4: 'HOUSE',
+  5: 'SHARE'
 }
 
-const performSearch = () => {
-  // Determine price range
-  let priceFrom = null
-  let priceTo = null
+const quickTags = [
+  'Gần ĐH Bách Khoa',
+  'Dưới 3 triệu',
+  'Có ban công',
+  'Cho nuôi thú cưng'
+]
 
-  if (selectedPrice.value !== 'custom') {
-    const [from, to] = selectedPrice.value.split('-')
-    priceFrom = from === '0' ? null : parseFloat(from) * 1000000
-    priceTo = to === '+' ? null : (to ? parseFloat(to) * 1000000 : null)
-  } else {
-    priceFrom = customPriceFrom.value ? customPriceFrom.value * 1000000 : null
-    priceTo = customPriceTo.value ? customPriceTo.value * 1000000 : null
-  }
-
-  // Map tabs to room types
-  const roomTypes = ['', 'PHONG_TRO', 'NHA_NGUYEN_CAN', 'CHUNG_CU']
-  const selectedType = roomTypes[activeTab.value]
-
+const handleSearch = () => {
   const query = {}
+  if (searchQuery.value) query.q = searchQuery.value
+  if (selectedLocation.value) query.location = selectedLocation.value
+  if (selectedPrice.value) query.price = selectedPrice.value
   
-  if (searchQuery.value) query.keyword = searchQuery.value
-  if (selectedLocation.value) query.city = selectedLocation.value
-  if (selectedType) query.roomType = selectedType
-  if (selectedArea.value) {
-    const [min, max] = selectedArea.value.split('-')
-    query.minArea = min
-    if (max && max !== '+') query.maxArea = max
-  }
-  
-  if (priceFrom !== null) query.minPrice = priceFrom
-  if (priceTo !== null) query.maxPrice = priceTo
+  const categoryCode = tabCategoryMap[activeTab.value]
+  if (categoryCode) query.type = categoryCode
 
-  console.log('Navigating to RoomList with query:', query)
   router.push({ name: 'RoomList', query })
 }
 
-// Load provinces
-const provinces = ref([])
-const loadProvinces = async () => {
-  try {
-    provinces.value = await vietnamAddressService.getProvinces()
-  } catch (error) {
-    console.error('Error loading provinces:', error)
+const applyQuickTag = (tag) => {
+  if (tag.includes('Bách Khoa')) {
+    searchQuery.value = 'Bách Khoa'
+  } else if (tag.includes('3 triệu')) {
+    selectedPrice.value = '1-3'
+  } else if (tag.includes('ban công') || tag.includes('thú cưng')) {
+    searchQuery.value = tag
   }
+  handleSearch()
 }
 
-// Promotion Slider Logic
-const sliderRef = ref(null)
-let autoPlayInterval = null
-
-const startAutoPlay = () => {
-  autoPlayInterval = setInterval(() => {
-    if (!sliderRef.value) return
-    
-    const slider = sliderRef.value
-    const scrollWidth = slider.scrollWidth
-    const clientWidth = slider.clientWidth
-    const currentScroll = slider.scrollLeft
-    
-    // If we're near the end, scroll back to start
-    if (currentScroll + clientWidth >= scrollWidth - 10) {
-      slider.scrollTo({ left: 0, behavior: 'smooth' })
-    } else {
-      // Otherwise scroll to next item
-      slider.scrollBy({ left: clientWidth, behavior: 'smooth' })
-    }
-  }, 5000) // Change slide every 5 seconds
-}
-
-const stopAutoPlay = () => {
-  if (autoPlayInterval) {
-    clearInterval(autoPlayInterval)
-    autoPlayInterval = null
-  }
-}
-
-import { onMounted, onUnmounted } from 'vue'
-
-onMounted(() => {
-  startAutoPlay()
-  loadProvinces()
-})
-
-onUnmounted(() => {
-  stopAutoPlay()
+onMounted(async () => {
+  provinces.value = await vietnamAddressService.getProvinces()
 })
 </script>
 
-<!-- Import external CSS file for Hero component styles -->
-<style src="@/assets/css/Hero.css"></style>
+<style scoped src="@/assets/css/Hero.css"></style>
