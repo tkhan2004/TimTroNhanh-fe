@@ -3,7 +3,7 @@
 .hero-wrapper {
   background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
   padding-top: 108px;
-  padding-bottom: 40px;
+  padding-bottom: 16px;
   border-bottom: 1px solid rgba(226, 232, 240, 0.8);
 }
 
@@ -285,9 +285,20 @@
   font-size: 1.15rem;
 }
 
-.box-sky { background: #e0f2fe; color: #0284c7; }
-.box-emerald { background: #d1fae5; color: #059669; }
-.box-amber { background: #fef3c7; color: #d97706; }
+.box-sky {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+
+.box-emerald {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.box-amber {
+  background: #fef3c7;
+  color: #d97706;
+}
 
 .float-top {
   top: 16px;

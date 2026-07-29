@@ -8,10 +8,10 @@
 .main-container {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 64px 24px 80px;
+  padding: 16px 24px 72px;
   display: flex;
   flex-direction: column;
-  gap: 64px;
+  gap: 48px;
 }
 
 .home-section {
